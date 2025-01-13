@@ -5,7 +5,7 @@ int main() {
     // Initialize the graphics
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
-printf("Hello World!\nPress START to exit.\n");
+    printf("Hello World!\nPress START to exit.\n");
     // Main loop
     while (aptMainLoop()) {
         hidScanInput(); // Scan input
