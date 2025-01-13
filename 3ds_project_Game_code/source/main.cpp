@@ -18,10 +18,10 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "#                                                #",
     "#  ###   ####  ####       ####  ####    ####     #",
     "#  ###   ####  ####   ##  ####  ####    ####     #",
-    "#        ####  ####   ##                     ####",
-    "#######        ####   ##                     ####",
+    "#        ####  ####   ##                     ### #",
+    "#######        ####   ##                     ### #",
     "#######  ####  ####   ##  ####  ####    ####     #",
-    "#       ####   ####   ##  ####  ####    ####     #",
+    "#        ####   ####  ##  ####  ####    ####     #",
     "#                                                #",
     "##################################################"
 };
@@ -29,19 +29,22 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
 // Initialize PacMan
 PacMan pacman = {1, 1, 'R'};
 
-void movePacMan() {
+void movePacMan(char direction) {
     int newX = pacman.x;
     int newY = pacman.y;
 
-    switch (pacman.direction) {
+    switch (direction) {
         case 'U': newY--; break;
         case 'D': newY++; break;
         case 'L': newX--; break;
         case 'R': newX++; break;
     }
 
-    // Check for collisions and bounds
-    if (newY >= 0 && newY < SCREEN_HEIGHT && newX >= 0 && newX < SCREEN_WIDTH && maze[newY][newX] != '#') {
+    // Check if new position is valid
+    if (maze[newY][newX] != '#') {
+        // Clear old position
+        maze[pacman.y][pacman.x] = ' ';
+        // Update to new position
         pacman.x = newX;
         pacman.y = newY;
     }
