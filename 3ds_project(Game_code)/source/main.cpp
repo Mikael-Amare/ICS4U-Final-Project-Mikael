@@ -29,7 +29,24 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
 // Initialize PacMan
 PacMan pacman = {1, 1, 'R'};
 
-// Function to draw the maze and PacMan
+void movePacMan() {
+    int newX = pacman.x;
+    int newY = pacman.y;
+
+    switch (pacman.direction) {
+        case 'U': newY--; break;
+        case 'D': newY++; break;
+        case 'L': newX--; break;
+        case 'R': newX++; break;
+    }
+
+    // Check for collisions and bounds
+    if (newY >= 0 && newY < SCREEN_HEIGHT && newX >= 0 && newX < SCREEN_WIDTH && maze[newY][newX] != '#') {
+        pacman.x = newX;
+        pacman.y = newY;
+    }
+}
+
 void drawMaze() {
     consoleClear();
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -44,29 +61,11 @@ void drawMaze() {
     }
 }
 
-// Function to handle movement
-void movePacMan() {
-    int newX = pacman.x;
-    int newY = pacman.y;
-
-    switch (pacman.direction) {
-        case 'U': newY--; break;
-        case 'D': newY++; break;
-        case 'L': newX--; break;
-        case 'R': newX++; break;
-    }
-
-    // Check for collisions with walls
-    if (maze[newY][newX] != '#') {
-        pacman.x = newX;
-        pacman.y = newY;
-    }
-}
-
 int main() {
     // Initialize services
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
+    consoleSetWindow(console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
