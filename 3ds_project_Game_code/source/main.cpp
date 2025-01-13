@@ -64,8 +64,9 @@ void drawMaze() {
 int main() {
     // Initialize services
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL);
-    consoleSetWindow(console, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    PrintConsole topScreen;
+    consoleInit(GFX_TOP, &topScreen);
+    consoleSetWindow(&topScreen, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
