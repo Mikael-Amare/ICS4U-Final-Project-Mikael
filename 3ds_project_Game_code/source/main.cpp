@@ -4,7 +4,7 @@
 
 // Screen size for console
 #define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 20
+#define SCREEN_HEIGHT 10
 
 // PacMan structure
 struct PacMan {
@@ -12,7 +12,7 @@ struct PacMan {
     char direction;
 };
 
-// Game maze (simple example)
+// Game maze
 const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "##################################################",
     "#                                                #",
@@ -42,16 +42,14 @@ void movePacMan(char direction) {
 
     // Check if new position is valid
     if (maze[newY][newX] != '#') {
-        // Clear old position
-        maze[pacman.y][pacman.x] = ' ';
-        // Update to new position
         pacman.x = newX;
         pacman.y = newY;
     }
 }
 
+
 void drawMaze() {
-    consoleClear();
+    consoleClear(); // Clear the console buffer
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
@@ -69,6 +67,8 @@ int main() {
     gfxInitDefault();
     PrintConsole topScreen;
     consoleInit(GFX_TOP, &topScreen);
+
+    // Ensure full screen display
     consoleSetWindow(&topScreen, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     printf("Pac-Man on 3DS\n");
@@ -89,7 +89,7 @@ int main() {
         if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
         // Move PacMan
-        movePacMan();
+        movePacMan(pacman.direction);
 
         // Draw the maze
         drawMaze();
