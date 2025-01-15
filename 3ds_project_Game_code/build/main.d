@@ -1,5 +1,5 @@
 main.o: \
- /Users/miki/ICS4U/ICS4U-Final-Project-Mikael/3ds_project_backup/source/main.cpp \
+ /Users/miki/ICS4U/ICS4U-Final-Project-Mikael/3ds_project_Game_code/source/main.cpp \
  /opt/devkitpro/libctru/include/3ds.h \
  /opt/devkitpro/libctru/include/3ds/types.h \
  /opt/devkitpro/libctru/include/3ds/result.h \
