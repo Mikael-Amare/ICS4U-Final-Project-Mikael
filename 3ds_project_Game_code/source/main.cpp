@@ -4,16 +4,17 @@
 
 // Updated screen size
 #define SCREEN_WIDTH 48
-#define SCREEN_HEIGHT 24
+#define SCREEN_HEIGHT 19
 
 // PacMan structure
 struct PacMan {
     int x, y;
     char direction;
+    int score;
 };
 
-// Updated game maze (adjusted to fit new screen size)
-const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
+// Updated game maze (adjusted to fit new screen size and allow pellets to disappear)
+char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "###################################################",
     "# • • • • • • • • • • • • • • • • • • • • • • • • #",
     "# •###• •#### • #### • • • #### • ####• • ####• • #",
@@ -30,34 +31,36 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "####### •#### • ### • # • ### • ####• • •#### • • #",
     "####### •#### • ### • # • • • • • • • • • • • • ###",
     "####### •#### • ### • # • • • • • • • • • • • • ###",
-    "# • • • •#### • ### • # • ### • ### • • • ### • • #",
-    "# • • • • • • • • • • • • • • • • • • • • • • • • #",
+    "#       •#### • ### • # • ### • ### • • • ### • • #",
+    "#     # • • • • • • • • • • • • • • • • • • • • • #",
     "###################################################"
 };
 
 // Initialize PacMan
-PacMan pacman = {1, 1, 'R'};
+PacMan pacman = {1, 16, 'R', 0};  // Starting position in the open area with score 0
 
 // Function to draw the maze and PacMan
 void drawMaze() {
     consoleClear();
+    printf("Score: %d\n", pacman.score); // Display the score at the top
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P");
+                printf("P"); // Draw Pac-Man
             } else {
-                printf("%c", maze[y][x]);
+                printf("%c", maze[y][x]); // Draw the maze
             }
         }
         printf("\n");
     }
 }
 
-// Function to handle movement
+// Function to handle movement and eating pellets
 void movePacMan() {
     int newX = pacman.x;
     int newY = pacman.y;
 
+    // Calculate the new position based on the direction
     switch (pacman.direction) {
         case 'U': newY--; break;
         case 'D': newY++; break;
@@ -69,6 +72,12 @@ void movePacMan() {
     if (maze[newY][newX] != '#') {
         pacman.x = newX;
         pacman.y = newY;
+
+        // Check if Pac-Man eats a pellet
+        if (maze[newY][newX] == '•') {
+            maze[newY][newX] = ' '; // Remove the pellet
+            pacman.score += 10;    // Increase the score
+        }
     }
 }
 
