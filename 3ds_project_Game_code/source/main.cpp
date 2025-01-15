@@ -11,12 +11,6 @@ struct PacMan {
     int score;
 };
 
-void initializeGameMaze() {
-    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
-    }
-}
-
 const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "################################################",
     "# ............................................ #",
@@ -75,6 +69,12 @@ void movePacMan() {
             gameMaze[newY][newX] = ' '; // Clear pellet
             pacman.score += 10;
         }
+    }
+}
+
+void initializeGameMaze() {
+    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
     }
 }
 
