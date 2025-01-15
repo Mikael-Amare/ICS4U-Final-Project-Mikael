@@ -61,12 +61,13 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
-    if (maze[newY][newX] != '#') {
+    // Use the mutable `gameMaze` for updates
+    if (gameMaze[newY][newX] != '#') { // Check for walls
         pacman.x = newX;
         pacman.y = newY;
 
-        if (maze[newY][newX] == '.') {
-            maze[newY][newX] = ' ';
+        if (gameMaze[newY][newX] == '.') { // Collect pellet
+            gameMaze[newY][newX] = ' '; // Clear pellet
             pacman.score += 10;
         }
     }
