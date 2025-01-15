@@ -11,6 +11,12 @@ struct PacMan {
     int score;
 };
 
+void initializeGameMaze() {
+    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
+    }
+}
+
 const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "################################################",
     "# ............................................ #",
@@ -61,7 +67,6 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
-    // Use the mutable `gameMaze` for updates
     if (gameMaze[newY][newX] != '#') { // Check for walls
         pacman.x = newX;
         pacman.y = newY;
@@ -76,6 +81,7 @@ void movePacMan() {
 int main() {
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
+    initializeGameMaze();
 
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
