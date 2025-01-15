@@ -1,6 +1,7 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
@@ -43,7 +44,7 @@ void drawMaze() {
             if (x == pacman.x && y == pacman.y) {
                 printf("P");
             } else {
-                printf("%c", maze[y][x]);
+                printf("%c", gameMaze[y][x]); // Use gameMaze
             }
         }
         printf("\n");
@@ -82,7 +83,6 @@ int main() {
     initializeGameMaze();
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
-
 
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
