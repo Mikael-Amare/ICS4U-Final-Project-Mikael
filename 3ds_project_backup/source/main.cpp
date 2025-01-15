@@ -4,7 +4,7 @@
 
 // Screen size for console
 #define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 20
+#define SCREEN_HEIGHT 30
 
 // PacMan structure
 struct PacMan {
