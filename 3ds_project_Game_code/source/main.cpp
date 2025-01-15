@@ -34,7 +34,14 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "################################################"
 };
 
+char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
+
+void initializeGameMaze() {
+    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
+    }
+}
 
 void drawMaze() {
     consoleClear();
@@ -44,7 +51,7 @@ void drawMaze() {
             if (x == pacman.x && y == pacman.y) {
                 printf("P");
             } else {
-                printf("%c", gameMaze[y][x]); // Use gameMaze
+                printf("%c", gameMaze[y][x]);
             }
         }
         printf("\n");
@@ -70,12 +77,6 @@ void movePacMan() {
             gameMaze[newY][newX] = ' '; // Clear pellet
             pacman.score += 10;
         }
-    }
-}
-
-void initializeGameMaze() {
-    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
     }
 }
 
