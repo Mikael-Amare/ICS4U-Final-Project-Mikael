@@ -44,6 +44,7 @@ void initializeGameMaze() {
 }
 
 void drawMaze() {
+    consoleSelect(NULL); // Ensure top screen is selected
     consoleClear();
     printf("Score: %d\n", pacman.score);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -83,8 +84,14 @@ void movePacMan() {
 int main() {
     initializeGameMaze();
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL);
 
+    // Initialize consoles for both screens
+    PrintConsole topScreen, bottomScreen;
+    consoleInit(GFX_TOP, &topScreen);
+    consoleInit(GFX_BOTTOM, &bottomScreen);
+
+    // Select bottom screen for initial messages
+    consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
 
@@ -100,14 +107,14 @@ int main() {
         if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
         movePacMan();
+
+        // Switch to top screen for drawing the maze
+        consoleSelect(&topScreen);
         drawMaze();
 
         gfxFlushBuffers();
         gfxSwapBuffers();
         gspWaitForVBlank();
-
-        // Add a delay (e.g., 200 milliseconds)
-        svcSleepThread(200 * 1000 * 1000); // Delay in nanoseconds
     }
 
     gfxExit();
