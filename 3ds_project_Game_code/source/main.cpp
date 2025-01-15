@@ -1,6 +1,5 @@
 #include <3ds.h>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 
 #define SCREEN_WIDTH 50
@@ -39,12 +38,12 @@ PacMan pacman = {1, 16, 'R', 0};
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Ensure null-termination
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
     }
 }
+
 void drawMaze() {
-    consoleSelect(NULL); // Ensure top screen is selected
+    consoleSelect(NULL); // Ensure drawing on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -90,10 +89,13 @@ int main() {
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
 
-    // Select bottom screen for initial messages
+    // Static text on the bottom screen
     consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
+
+    // Disable double buffering for the bottom screen (static text won't need updates)
+    gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -108,7 +110,7 @@ int main() {
 
         movePacMan();
 
-        // Switch to top screen for drawing the maze
+        // Switch to the top screen to draw the game
         consoleSelect(&topScreen);
         drawMaze();
 
