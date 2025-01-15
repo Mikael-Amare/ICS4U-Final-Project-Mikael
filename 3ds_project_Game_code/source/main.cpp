@@ -105,6 +105,9 @@ int main() {
         gfxFlushBuffers();
         gfxSwapBuffers();
         gspWaitForVBlank();
+
+        // Add a delay (e.g., 200 milliseconds)
+        svcSleepThread(200 * 1000 * 1000); // Delay in nanoseconds
     }
 
     gfxExit();
