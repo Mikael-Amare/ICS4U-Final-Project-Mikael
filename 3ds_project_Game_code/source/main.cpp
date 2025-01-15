@@ -79,9 +79,10 @@ void initializeGameMaze() {
 }
 
 int main() {
+    initializeGameMaze();
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
-    initializeGameMaze();
+
 
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
