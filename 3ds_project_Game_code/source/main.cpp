@@ -39,10 +39,10 @@ PacMan pacman = {1, 16, 'R', 0};
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Ensure null-termination
     }
 }
-
 void drawMaze() {
     consoleSelect(NULL); // Ensure top screen is selected
     consoleClear();
