@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 // Screen size for console
-#define SCREEN_WIDTH 50
+#define SCREEN_WIDTH 51
 #define SCREEN_HEIGHT 20
 
 // PacMan structure
@@ -18,8 +18,8 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "#                                                #",
     "#  ###   ####  ####       ####  ####    ####     #",
     "#  ###   ####  ####   ##  ####  ####    ####     #",
-    "#        ####  ####   ##                     ####",
-    "#######        ####   ##                     ####",
+    "#        ####  ####   ##                     #### ",
+    "#######        ####   ##                     #### ",
     "#######  ####  ####   ##  ####  ####    ####     #",
     "#       ####   ####   ##  ####  ####    ####     #",
     "#                                                #",
