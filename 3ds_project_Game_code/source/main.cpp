@@ -63,10 +63,10 @@ void movePacMan() {
     int newY = pacman.y;
 
     switch (pacman.direction) {
-        case 'U': newY--; break;
-        case 'D': newY++; break;
-        case 'L': newX--; break;
-        case 'R': newX++; break;
+        case 'U': newY-1; break;
+        case 'D': newY+1; break;
+        case 'L': newX-1; break;
+        case 'R': newX+1; break;
     }
 
     if (gameMaze[newY][newX] != '#') { // Check for walls
