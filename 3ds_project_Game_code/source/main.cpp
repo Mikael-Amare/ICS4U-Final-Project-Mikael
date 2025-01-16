@@ -1,5 +1,6 @@
 #include <3ds.h>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #define SCREEN_WIDTH 50
@@ -13,13 +14,13 @@ struct PacMan {
 
 const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "################################################",
-    "# .............................................#",
-    "# .###. .#### . #### . . . #### . ### . . ####.#",
-    "# .###. .#### . #### . ## . . . . ### . . ####.#",
+    "# ............................................ #",
+    "# .###. .#### . #### . . . #### . ####. . ####.#",
+    "# .###. .#### . #### . ## . . . . ####. . ####.#",
     "# . . . .#### . #### . ## . . . . . . . . . . ##",
     "####### . . . . #### . ## . . . . . . . . . . ##",
-    "####### .#### . #### . ## . ### . ### . . # . ##",
-    "# . . . .#### . #### . ## . ### . ### . . # . ##",
+    "####### .#### . #### . ##  ####  #### . . ####.#",
+    "# . . . .#### . #### . ##  ####  #### . . ####.#",
     "# . . . . . . . . . . . . . . . . . . . . . . .#",
     "####### . ######################### . ##########",
     "# . . . . ### . ### . . # . . . . . . . . . . .#",
@@ -43,7 +44,6 @@ void initializeGameMaze() {
 }
 
 void drawMaze() {
-    consoleSelect(NULL); // Ensure drawing on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -83,19 +83,10 @@ void movePacMan() {
 int main() {
     initializeGameMaze();
     gfxInitDefault();
+    consoleInit(GFX_TOP, NULL);
 
-    // Initialize consoles for both screens
-    PrintConsole topScreen, bottomScreen;
-    consoleInit(GFX_TOP, &topScreen);
-    consoleInit(GFX_BOTTOM, &bottomScreen);
-
-    // Static text on the bottom screen
-    consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
-
-    // Disable double buffering for the bottom screen (static text won't need updates)
-    gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -109,14 +100,14 @@ int main() {
         if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
         movePacMan();
-
-        // Switch to the top screen to draw the game
-        consoleSelect(&topScreen);
         drawMaze();
 
         gfxFlushBuffers();
         gfxSwapBuffers();
         gspWaitForVBlank();
+
+        // Add a delay (e.g., 200 milliseconds)
+        svcSleepThread(200 * 1000 * 1000); // Delay in nanoseconds
     }
 
     gfxExit();
