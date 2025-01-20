@@ -36,6 +36,8 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
 char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
 
+PrintConsole topScreen, bottomScreen; // Declare consoles globally
+
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
         strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
@@ -85,7 +87,6 @@ int main() {
     gfxInitDefault();
     
     // Initialize consoles for both screens
-    PrintConsole topScreen, bottomScreen;
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
 
