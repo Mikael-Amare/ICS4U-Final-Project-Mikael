@@ -113,7 +113,7 @@ int main() {
             gameRunning = true; // Set the game running flag
             consoleClear(); // Clear bottom console
             consoleSelect(&bottomScreen);
-            printf("Game started!\n");
+            printf("Game started! Use arrows to move Pac-Man.\n");
         }
 
         // If the game is running, process game logic
@@ -129,10 +129,6 @@ int main() {
             // Switch to the top screen to draw the game
             consoleSelect(&topScreen);
             drawMaze(); // Draw the maze with Pac-Man
-
-            // Draw any other game-specific graphics here if necessary
-            consoleSelect(&bottomScreen);
-            printf("Use arrows to move Pac-Man.\n");
 
             gfxFlushBuffers(); // Flush the graphics buffers
             gfxSwapBuffers(); // Swap the buffers to display
