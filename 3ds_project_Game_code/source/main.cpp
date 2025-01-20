@@ -93,33 +93,43 @@ int main() {
     // Static text on the bottom screen
     consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
+    printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
     // Disable double buffering for the bottom screen (static text won't need updates)
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
+    bool gameRunning = false; // Flag to track whether the game is running
+
     while (aptMainLoop()) {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        if (kDown & KEY_A) break; // Use the A button to skip the start screen
-        if (kDown & KEY_START) break; // Still keep the START button for exiting the game
+        if (kDown & KEY_START) break; // Exit the loop on START key press
 
-        // Check for directional inputs
-        if (kDown & KEY_UP) pacman.direction = 'U';
-        if (kDown & KEY_DOWN) pacman.direction = 'D';
-        if (kDown & KEY_LEFT) pacman.direction = 'L';
-        if (kDown & KEY_RIGHT) pacman.direction = 'R';
+        // Start the game if A is pressed
+        if (kDown & KEY_A && !gameRunning) {
+            gameRunning = true; // Set the game running flag
+        }
 
-        movePacMan(); // Move Pac-Man based on direction
+        // If the game is running, process game logic
+        if (gameRunning) {
+            // Check for directional inputs
+            if (kDown & KEY_UP) pacman.direction = 'U';
+            if (kDown & KEY_DOWN) pacman.direction = 'D';
+            if (kDown & KEY_LEFT) pacman.direction = 'L';
+            if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-        // Switch to the top screen to draw the game
-        consoleSelect(&topScreen);
-        drawMaze(); // Draw the maze with Pac-Man
+            movePacMan(); // Move Pac-Man based on direction
 
-        gfxFlushBuffers(); // Flush the graphics buffers
-        gfxSwapBuffers(); // Swap the buffers to display
-        gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
+            // Switch to the top screen to draw the game
+            consoleSelect(&topScreen);
+            drawMaze(); // Draw the maze with Pac-Man
+
+            gfxFlushBuffers(); // Flush the graphics buffers
+            gfxSwapBuffers(); // Swap the buffers to display
+            gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
+        }
     }
 
     gfxExit(); // Clean up graphics before exiting
