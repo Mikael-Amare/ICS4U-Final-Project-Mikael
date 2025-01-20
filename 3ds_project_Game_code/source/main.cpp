@@ -111,8 +111,7 @@ int main() {
         // Start the game if A is pressed
         if (kDown & KEY_A && !gameRunning) {
             gameRunning = true; // Set the game running flag
-            // Clear the bottom screen when starting the game
-            consoleClear();
+            consoleClear(); // Clear bottom console
             consoleSelect(&bottomScreen);
             printf("Game started!\n");
         }
@@ -130,6 +129,10 @@ int main() {
             // Switch to the top screen to draw the game
             consoleSelect(&topScreen);
             drawMaze(); // Draw the maze with Pac-Man
+
+            // Draw any other game-specific graphics here if necessary
+            consoleSelect(&bottomScreen);
+            printf("Use arrows to move Pac-Man.\n");
 
             gfxFlushBuffers(); // Flush the graphics buffers
             gfxSwapBuffers(); // Swap the buffers to display
