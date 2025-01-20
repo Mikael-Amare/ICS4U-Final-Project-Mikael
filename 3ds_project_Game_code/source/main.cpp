@@ -102,7 +102,8 @@ int main() {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        if (kDown & KEY_START) break; // Exit the loop on START key press
+        if (kDown & KEY_A) break; // Use the A button to skip the start screen
+        if (kDown & KEY_START) break; // Still keep the START button for exiting the game
 
         // Check for directional inputs
         if (kDown & KEY_UP) pacman.direction = 'U';
