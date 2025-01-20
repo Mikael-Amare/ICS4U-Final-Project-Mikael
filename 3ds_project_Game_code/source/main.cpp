@@ -105,11 +105,16 @@ int main() {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        if (kDown & KEY_START) break; // Exit the loop on START key press
+        // Exit the loop on START key press
+        if (kDown & KEY_START) break;
 
         // Start the game if A is pressed
         if (kDown & KEY_A && !gameRunning) {
             gameRunning = true; // Set the game running flag
+            // Clear the bottom screen when starting the game
+            consoleClear();
+            consoleSelect(&bottomScreen);
+            printf("Game started!\n");
         }
 
         // If the game is running, process game logic
