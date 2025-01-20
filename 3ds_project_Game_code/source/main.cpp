@@ -43,7 +43,7 @@ void initializeGameMaze() {
 }
 
 void drawMaze() {
-    consoleSelect(NULL); // Ensure drawing on the top screen
+    consoleSelect(&topScreen); // Draw on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -82,9 +82,8 @@ void movePacMan() {
 }
 
 int main() {
-    initializeGameMaze();
     gfxInitDefault();
-
+    
     // Initialize consoles for both screens
     PrintConsole topScreen, bottomScreen;
     consoleInit(GFX_TOP, &topScreen);
@@ -98,6 +97,7 @@ int main() {
 
     // Disable double buffering for the bottom screen (static text won't need updates)
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
+    initializeGameMaze(); // Initialize the maze before game loop
 
     bool gameRunning = false; // Flag to track whether the game is running
 
@@ -127,7 +127,6 @@ int main() {
             movePacMan(); // Move Pac-Man based on direction
 
             // Switch to the top screen to draw the game
-            consoleSelect(&topScreen);
             drawMaze(); // Draw the maze with Pac-Man
 
             gfxFlushBuffers(); // Flush the graphics buffers
