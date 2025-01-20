@@ -1,6 +1,5 @@
 #include <3ds.h>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 
 #define SCREEN_WIDTH 50
@@ -44,17 +43,18 @@ void initializeGameMaze() {
 }
 
 void drawMaze() {
+    consoleSelect(NULL); // Ensure drawing on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P");
+                printf("P"); // Draw Pac-Man
             } else {
-                printf("%c", gameMaze[y][x]);
+                printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
-        printf("\n");
+        printf("\n"); // Move to the next line
     }
 }
 
@@ -69,13 +69,14 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
-    if (gameMaze[newY][newX] != '#') { // Check for walls
+    // Ensure the new position is within bounds and not a wall
+    if (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#') {
         pacman.x = newX;
         pacman.y = newY;
 
         if (gameMaze[newY][newX] == '.') { // Collect pellet
             gameMaze[newY][newX] = ' '; // Clear pellet
-            pacman.score += 10;
+            pacman.score += 10; // Update score
         }
     }
 }
@@ -83,33 +84,43 @@ void movePacMan() {
 int main() {
     initializeGameMaze();
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL);
 
+    // Initialize consoles for both screens
+    PrintConsole topScreen, bottomScreen;
+    consoleInit(GFX_TOP, &topScreen);
+    consoleInit(GFX_BOTTOM, &bottomScreen);
+
+    // Static text on the bottom screen
+    consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press START to exit.\n");
+
+    // Disable double buffering for the bottom screen (static text won't need updates)
+    gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
     while (aptMainLoop()) {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        if (kDown & KEY_START) break;
+        if (kDown & KEY_START) break; // Exit the loop on START key press
 
+        // Check for directional inputs
         if (kDown & KEY_UP) pacman.direction = 'U';
         if (kDown & KEY_DOWN) pacman.direction = 'D';
         if (kDown & KEY_LEFT) pacman.direction = 'L';
         if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-        movePacMan();
-        drawMaze();
+        movePacMan(); // Move Pac-Man based on direction
 
-        gfxFlushBuffers();
-        gfxSwapBuffers();
-        gspWaitForVBlank();
+        // Switch to the top screen to draw the game
+        consoleSelect(&topScreen);
+        drawMaze(); // Draw the maze with Pac-Man
 
-        // Add a delay (e.g., 200 milliseconds)
-        svcSleepThread(200 * 1000 * 1000); // Delay in nanoseconds
+        gfxFlushBuffers(); // Flush the graphics buffers
+        gfxSwapBuffers(); // Swap the buffers to display
+        gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
     }
 
-    gfxExit();
-    return 0;
+    gfxExit(); // Clean up graphics before exiting
+    return 0; // Return success
 }
