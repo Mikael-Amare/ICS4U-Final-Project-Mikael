@@ -65,21 +65,15 @@ void drawMaze() {
     consoleClear();
     printf("Score: %d\n", pacman.score);
 
-    // Use PADDING_LEFT and PADDING_TOP to center the maze
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        // Apply padding for vertical position
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            // Calculate the offset position
-            int posX = PADDING_LEFT + (x * CHARACTER_WIDTH);
-            int posY = PADDING_TOP + (y * CHARACTER_HEIGHT);
-            
-            // If Pac-Man's position matches the current position, draw Pac-Man
             if (x == pacman.x && y == pacman.y) {
-                printf("\033[%d;%dHP", posY, posX); // Move to position and draw Pac-Man
+                printf("P"); // Display Pac-Man
             } else {
-                printf("\033[%d;%dH%c", posY, posX, gameMaze[y][x]); // Move to position and draw maze
+                printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
+        printf("\n"); // New line after each row
     }
 }
 
