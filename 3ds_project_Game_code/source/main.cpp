@@ -51,10 +51,13 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        // Ensure that maze[counter] does not exceed SCREEN_WIDTH
-        // Only copy up to SCREEN_WIDTH characters
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Ensure null-termination
+        // Ensure maze[counter] is appropriately null-terminated after the copy.
+        if (strlen(maze[counter]) > SCREEN_WIDTH) {
+            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
+        } else {
+            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
+        }
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
