@@ -3,8 +3,8 @@
 #include <cstring>
 #include <algorithm> // For std::min
 
-#define SCREEN_WIDTH 50  // Width of the maze
-#define SCREEN_HEIGHT 20 // Height of the maze
+#define SCREEN_WIDTH 32  // Width of the maze
+#define SCREEN_HEIGHT 26 // Height of the maze
 #define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
 #define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
 #define MOVE_DELAY 5 // Delaying PMan movement
