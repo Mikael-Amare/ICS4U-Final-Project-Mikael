@@ -36,24 +36,15 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
 char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
 
+PrintConsole topScreen, bottomScreen; // Declare consoles globally
+
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
         strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
     }
     pacman.score = 0; // Reset score
-    pacman.x = 1; // Reset Pac-Man's position
-    pacman.y = 16; // Reset Pac-Man's position
-}
-
-bool allDotsCollected() {
-    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            if (gameMaze[y][x] == '.') { // Check for remaining dots
-                return false; // Not all dots collected
-            }
-        }
-    }
-    return true; // All dots collected
+    pacman.x = 1; // Reset Pac-Man's initial position
+    pacman.y = 16; // Reset Pac-Man's initial position
 }
 
 void drawMaze() {
@@ -95,11 +86,21 @@ void movePacMan() {
     }
 }
 
+bool allDotsCollected() {
+    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            if (gameMaze[y][x] == '.') { // If there's a dot
+                return false; // Not all dots collected
+            }
+        }
+    }
+    return true; // All dots are collected
+}
+
 int main() {
     gfxInitDefault();
     
     // Initialize consoles for both screens
-    PrintConsole topScreen, bottomScreen;
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
 
@@ -111,7 +112,7 @@ int main() {
 
     // Disable double buffering for the bottom screen (static text won't need updates)
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    initializeGameMaze(); // Initialize the maze before game loop
+    initializeGameMaze(); // Initialize the maze before the game loop
 
     bool gameRunning = false; // Flag to track whether the game is running
 
