@@ -4,7 +4,8 @@
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
-#define MOVE_DELAY 10 // Adjust this value to change Pac-Man's speed
+#define MOVE_DELAY 5 // Adjust this value to change Pac-Man's speed
+#define PADDING_LEFT 10 // Padding to center the game on the screen
 
 struct PacMan {
     int x, y;
@@ -17,8 +18,8 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "# ............................................ #",
     "# .###. .#### . #### . . . #### . ####. . ####.#",
     "# .###. .#### . #### . ## . . . . ####. . ####.#",
-    "# . . . .#### . #### . ## . . . . . . . . . . ##",
-    "####### . . . . #### . ## . . . . . . . . . . ##",
+    "# . . . .#### . #### . ## . . . . . . . . . . .#",
+    "####### . . . . #### . ## . . . . . . . . . . .#",
     "####### .#### . #### . ##  ####  #### . . ####.#",
     "# . . . .#### . #### . ##  ####  #### . . ####.#",
     "# . . . . . . . . . . . . . . . . . . . . . . .#",
@@ -27,8 +28,8 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "# . . . . ### . ### . . #  ####  #### . . ####.#",
     "# . . . . . . . . . . . . . . . . . . . . . . .#",
     "####### .#### . ### . # . ### . ####. . .#### .#",
-    "####### .#### . ### . # . . . . . . . . . . . ##",
-    "####### .#### . ### . # . . . . . . . . . . . ##",
+    "####### .#### . ### . # . . . . . . . . . . . .#",
+    "####### .#### . ### . # . . . . . . . . . . . .#",
     "#       .#### . ### . # . ### . ### . . . ### .#",
     "#     # . . . . . . . . . . . . . . . . . . . .#",
     "################################################"
@@ -41,7 +42,8 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
+        strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
+        gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Null-terminate
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -52,6 +54,10 @@ void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
+
+    // Calculate the starting point to center the maze
+    int startX = PADDING_LEFT;
+
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
@@ -62,6 +68,18 @@ void drawMaze() {
         }
         printf("\n"); // Move to the next line
     }
+
+    // Padding the left side for centering
+    for (int i = 0; i < PADDING_LEFT; ++i) {
+        printf(" "); // Print spaces for padding
+    }
+}
+
+void renderPauseMenu() {
+    consoleSelect(&topScreen);
+    printf("\x1b[10;10H--- PAUSE MENU ---");
+    printf("\x1b[12;10HPress A to Resume");
+    printf("\x1b[14;10HPress START to Quit");
 }
 
 void movePacMan() {
@@ -100,7 +118,7 @@ bool allDotsCollected() {
 
 int main() {
     gfxInitDefault();
-    
+
     // Initialize consoles for both screens
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
@@ -146,6 +164,29 @@ int main() {
             if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
                 movePacMan(); // Move Pac-Man based on direction
                 moveCounter = 0; // Reset the move counter
+            }
+
+            // Pause game if SELECT button is pressed
+            if (kDown & KEY_SELECT) {
+                renderPauseMenu();
+                bool inPauseMenu = true; // Set the pause state
+                while (inPauseMenu) {
+                    hidScanInput(); // Scan for input
+                    u32 pauseInput = hidKeysDown();
+                    renderPauseMenu(); // Draw the pause menu
+
+                    // Check for input to exit the pause menu
+                    if (pauseInput & KEY_START) {
+                        inPauseMenu = false; // Quit the game
+                    }
+                    if (pauseInput & KEY_A) {
+                        inPauseMenu = false; // Resume the game
+                    }
+
+                    gfxFlushBuffers(); // Update screen
+                    gfxSwapBuffers(); // Swap buffers
+                    gspWaitForVBlank(); // Wait for vertical sync
+                }
             }
 
             // Check if all dots are collected
