@@ -6,6 +6,7 @@
 #define SCREEN_HEIGHT 20 // Height of the maze
 #define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
 #define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
+#define MOVE_DELAY 5 // Delaying pacman movement.
 
 // Calculate padding for centering
 #define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
