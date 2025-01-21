@@ -4,7 +4,7 @@
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
-#define MOVE_DELAY 10 // Adjust this value to change Pac-Man's speed
+#define MOVE_DELAY 5 // Adjust this value to change Pac-Man's speed
 
 struct PacMan {
     int x, y;
