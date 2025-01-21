@@ -4,6 +4,7 @@
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
+#define MOVE_DELAY 10 // Adjust this value to change Pac-Man's speed
 
 struct PacMan {
     int x, y;
@@ -115,6 +116,7 @@ int main() {
     initializeGameMaze(); // Initialize the maze before the game loop
 
     bool gameRunning = false; // Flag to track whether the game is running
+    int moveCounter = 0; // Timer for movement delay
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -139,7 +141,12 @@ int main() {
             if (kDown & KEY_LEFT) pacman.direction = 'L';
             if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-            movePacMan(); // Move Pac-Man based on direction
+            // Increment the move counter
+            moveCounter++;
+            if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
+                movePacMan(); // Move Pac-Man based on direction
+                moveCounter = 0; // Reset the move counter
+            }
 
             // Check if all dots are collected
             if (allDotsCollected()) {
