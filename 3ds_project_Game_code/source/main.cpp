@@ -51,7 +51,8 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        size_t lengthToCopy = std::min(strlen(maze[counter]), static_cast<size_t>(SCREEN_WIDTH - 1));
+        // Ensure the length copied does not exceed the size of the destination buffer
+        size_t lengthToCopy = std::min(strlen(maze[counter]), static_cast<size_t>(SCREEN_WIDTH)); // No need to -1 since we're handling it with a null terminator below
         strncpy(gameMaze[counter], maze[counter], lengthToCopy);
         gameMaze[counter][lengthToCopy] = '\0'; // Ensure null-termination
     }
