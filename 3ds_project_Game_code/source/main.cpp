@@ -41,14 +41,8 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        if (strlen(maze[counter]) >= sizeof(gameMaze[counter])) {
-            // If maze[counter] is too long, truncate it to fit.
-            strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
-            gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Null-terminate
-        } else {
-            // If it fits, simply copy it.
-            strcpy(gameMaze[counter], maze[counter]);
-        }
+        strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
+        gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Null-terminate
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -69,6 +63,13 @@ void drawMaze() {
         }
         printf("\n"); // Move to the next line
     }
+}
+
+void renderPauseMenu() {
+    // Display the pause menu
+    printf("\x1b[10;10H--- PAUSE MENU ---");
+    printf("\x1b[12;10HPress A to Resume");
+    printf("\x1b[14;10HPress START to Quit");
 }
 
 void movePacMan() {
@@ -153,6 +154,29 @@ int main() {
             if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
                 movePacMan(); // Move Pac-Man based on direction
                 moveCounter = 0; // Reset the move counter
+            }
+
+            // Pause game if SELECT button is pressed
+            if (kDown & KEY_SELECT) {
+                renderPauseMenu();
+                bool inPauseMenu = true; // Set the pause state
+                while (inPauseMenu) {
+                    hidScanInput(); // Scan for input
+                    u32 pauseInput = hidKeysDown();
+                    renderPauseMenu(); // Draw the pause menu
+
+                    // Check for input to exit the pause menu
+                    if (pauseInput & KEY_START) {
+                        inPauseMenu = false; // Quit the game
+                    }
+                    if (pauseInput & KEY_A) {
+                        inPauseMenu = false; // Resume the game
+                    }
+
+                    gfxFlushBuffers(); // Update screen
+                    gfxSwapBuffers(); // Swap buffers
+                    gspWaitForVBlank(); // Wait for vertical sync
+                }
             }
 
             // Check if all dots are collected
