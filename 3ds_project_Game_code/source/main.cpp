@@ -5,6 +5,7 @@
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
 #define MOVE_DELAY 5 // Adjust this value to change Pac-Man's speed
+#define PADDING_LEFT 10 // Padding to center the game on the screen
 
 struct PacMan {
     int x, y;
@@ -41,14 +42,8 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-                if (strlen(maze[counter]) >= sizeof(gameMaze[counter])) {
-            // If maze[counter] is too long, truncate it to fit.
         strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
         gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Null-terminate
-        } else {
-            // If it fits, simply copy it.
-            strcpy(gameMaze[counter], maze[counter]);
-        }
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -59,6 +54,10 @@ void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
     consoleClear();
     printf("Score: %d\n", pacman.score);
+
+    // Calculate the starting point to center the maze
+    int startX = PADDING_LEFT;
+
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
@@ -69,10 +68,15 @@ void drawMaze() {
         }
         printf("\n"); // Move to the next line
     }
+
+    // Padding the left side for centering
+    for (int i = 0; i < PADDING_LEFT; ++i) {
+        printf(" "); // Print spaces for padding
+    }
 }
 
 void renderPauseMenu() {
-    // Display the pause menu
+    consoleSelect(&topScreen);
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
@@ -114,7 +118,7 @@ bool allDotsCollected() {
 
 int main() {
     gfxInitDefault();
-    
+
     // Initialize consoles for both screens
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
