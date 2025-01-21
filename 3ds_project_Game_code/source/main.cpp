@@ -1,21 +1,17 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
-#include <cstring> // Include necessary headers
 #include <algorithm> // For std::min
 
 #define SCREEN_WIDTH 50  // Width of the maze
 #define SCREEN_HEIGHT 20 // Height of the maze
 #define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
 #define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
-#define MOVE_DELAY 5 // Delaying pacman movement.
+#define MOVE_DELAY 5 // Delaying PMan movement
 
 // Calculate padding for centering
 #define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
 #define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
-// Assuming maze and gameMaze are defined globally
-const char maze[SCREEN_HEIGHT][1024]; // Example definition with max length of 1024 characters
-char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH]; // Define gameMaze with appropriate dimensions
 
 const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
 const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
@@ -33,8 +29,8 @@ const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
     "# .###. .#### . #### . ## . . . . ####. . ### . #",
     "# . . . .#### . #### . ## . . . . . . . . . . . #",
     "####### . . . . #### . ## . . . . . . . . . . . #",
-    "####### .#### . #### . ##  ####  #### . . ### . #",
-    "# . . . .#### . #### . ##  ####  #### . . ### . #",
+    "####### .#### . #### . ##  ## . . ### . . ### . #",
+    "# . . . .#### . #### . ##  ## . . ### . . ### . #",
     "# . . . . . . . . . . . . . . . . . . . . . . . #",
     "####### . ######################### . ###########",
     "# . . . . ### . ### . . # . . . . . . . . . . . #",
@@ -55,9 +51,7 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        // Use std::min to copy the smaller of the two lengths
         size_t lengthToCopy = std::min(strlen(maze[counter]), static_cast<size_t>(SCREEN_WIDTH - 1));
-        
         strncpy(gameMaze[counter], maze[counter], lengthToCopy);
         gameMaze[counter][lengthToCopy] = '\0'; // Ensure null-termination
     }
