@@ -1,7 +1,6 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
-#include <usleep>
 #include <algorithm> // For std::min
 
 #define SCREEN_WIDTH 50  // Width of the maze
@@ -212,8 +211,6 @@ int main() {
                 gfxSwapBuffers(); // Swap the buffers to display
                 gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
             }
-        } else {
-            usleep(16667); // Sleep approximately 16.67 ms to create a roughly 60 FPS frame rate when the game is not running
         }
     }
 
