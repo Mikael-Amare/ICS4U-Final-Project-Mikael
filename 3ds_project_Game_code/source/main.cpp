@@ -55,8 +55,7 @@ void drawMaze() {
     consoleClear();
     printf("Score: %d\n", pacman.score);
 
-    // Calculate the starting point to center the maze
-    int startX = PADDING_LEFT;
+    // Removed `int startX = PADDING_LEFT;` if it's not needed
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
@@ -67,11 +66,6 @@ void drawMaze() {
             }
         }
         printf("\n"); // Move to the next line
-    }
-
-    // Padding the left side for centering
-    for (int i = 0; i < PADDING_LEFT; ++i) {
-        printf(" "); // Print spaces for padding
     }
 }
 
