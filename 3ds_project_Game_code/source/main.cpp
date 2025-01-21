@@ -82,7 +82,7 @@ void drawMaze() {
 }
 
 void renderPauseMenu() {
-    consoleSelect(&topScreen);
+    consoleSelect(&bottomScreen);
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
