@@ -4,6 +4,7 @@
 
 #define SCREEN_WIDTH 50
 #define SCREEN_HEIGHT 19
+#define MOVE_DELAY 10 // Adjust this value to change Pac-Man's speed
 
 struct PacMan {
     int x, y;
@@ -42,6 +43,9 @@ void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
         strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH + 1);
     }
+    pacman.score = 0; // Reset score
+    pacman.x = 1; // Reset Pac-Man's initial position
+    pacman.y = 16; // Reset Pac-Man's initial position
 }
 
 void drawMaze() {
@@ -83,6 +87,17 @@ void movePacMan() {
     }
 }
 
+bool allDotsCollected() {
+    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            if (gameMaze[y][x] == '.') { // If there's a dot
+                return false; // Not all dots collected
+            }
+        }
+    }
+    return true; // All dots are collected
+}
+
 int main() {
     gfxInitDefault();
     
@@ -98,9 +113,10 @@ int main() {
 
     // Disable double buffering for the bottom screen (static text won't need updates)
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    initializeGameMaze(); // Initialize the maze before game loop
+    initializeGameMaze(); // Initialize the maze before the game loop
 
     bool gameRunning = false; // Flag to track whether the game is running
+    int moveCounter = 0; // Timer for movement delay
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -125,14 +141,29 @@ int main() {
             if (kDown & KEY_LEFT) pacman.direction = 'L';
             if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-            movePacMan(); // Move Pac-Man based on direction
+            // Increment the move counter
+            moveCounter++;
+            if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
+                movePacMan(); // Move Pac-Man based on direction
+                moveCounter = 0; // Reset the move counter
+            }
 
-            // Switch to the top screen to draw the game
-            drawMaze(); // Draw the maze with Pac-Man
+            // Check if all dots are collected
+            if (allDotsCollected()) {
+                consoleSelect(&bottomScreen);
+                printf("Congratulations! All dots collected!\n");
+                consoleClear();
+                initializeGameMaze(); // Reset the game
+                printf("Press A to start the game again.\n");
+                gameRunning = false; // Reset game state
+            } else {
+                // Switch to the top screen to draw the game
+                drawMaze(); // Draw the maze with Pac-Man
 
-            gfxFlushBuffers(); // Flush the graphics buffers
-            gfxSwapBuffers(); // Swap the buffers to display
-            gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
+                gfxFlushBuffers(); // Flush the graphics buffers
+                gfxSwapBuffers(); // Swap the buffers to display
+                gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
+            }
         }
     }
 
