@@ -2,10 +2,17 @@
 #include <cstdio>
 #include <cstring>
 
-#define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 19
-#define MOVE_DELAY 5 // Adjust this value to change Pac-Man's speed
-#define PADDING_LEFT 10 // Padding to center the game on the screen
+#define SCREEN_WIDTH 50  // Width of the maze
+#define SCREEN_HEIGHT 20 // Height of the maze
+#define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
+#define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
+
+// Calculate padding for centering
+#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
+#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+
+const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
+const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
 
 struct PacMan {
     int x, y;
@@ -55,17 +62,21 @@ void drawMaze() {
     consoleClear();
     printf("Score: %d\n", pacman.score);
 
-    // Removed `int startX = PADDING_LEFT;` if it's not needed
-
+    // Use PADDING_LEFT and PADDING_TOP to center the maze
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        // Apply padding for vertical position
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            // Calculate the offset position
+            int posX = PADDING_LEFT + (x * CHARACTER_WIDTH);
+            int posY = PADDING_TOP + (y * CHARACTER_HEIGHT);
+            
+            // If Pac-Man's position matches the current position, draw Pac-Man
             if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Draw Pac-Man
+                printf("\033[%d;%dHP", posY, posX); // Move to position and draw Pac-Man
             } else {
-                printf("%c", gameMaze[y][x]); // Draw maze
+                printf("\033[%d;%dH%c", posY, posX, gameMaze[y][x]); // Move to position and draw maze
             }
         }
-        printf("\n"); // Move to the next line
     }
 }
 
