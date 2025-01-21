@@ -51,17 +51,19 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        // Ensure maze[counter] is appropriately null-terminated after the copy.
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
         if (strlen(maze[counter]) > SCREEN_WIDTH) {
-            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
-        } else {
-            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
+            printf("Warning: Maze row %d truncated to SCREEN_WIDTH.\n", counter);
         }
+        // Ensure remaining spaces are filled
+        for (int col = strlen(gameMaze[counter]); col < SCREEN_WIDTH; ++col) {
+            gameMaze[counter][col] = ' ';
+        }
+        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null-terminate each row
     }
     pacman.score = 0; // Reset score
-    pacman.x = 1; // Reset Pac-Man's initial position
-    pacman.y = 16; // Reset Pac-Man's initial position
+    pacman.x = 1;     // Reset Pac-Man's initial position
+    pacman.y = 16;    // Reset Pac-Man's initial position
 }
 
 void drawMaze() {
@@ -70,8 +72,7 @@ void drawMaze() {
     printf("Score: %d\n", pacman.score);
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        // Start a new line before rendering each row of the maze
-        printf("\x1b[%d;1H", y + 3);  // Start printing from row 3 to leave space for the score
+        printf("\x1b[%d;%dH", y + 3 + PADDING_TOP / CHARACTER_HEIGHT, PADDING_LEFT / CHARACTER_WIDTH + 1);  // Centered position
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
                 printf("P"); // Display Pac-Man
@@ -84,6 +85,7 @@ void drawMaze() {
 
 void renderPauseMenu() {
     consoleSelect(&topScreen);
+    consoleClear(); // Clear screen before rendering
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
@@ -184,11 +186,15 @@ int main() {
 
                     // Check for input to exit the pause menu
                     if (pauseInput & KEY_START) {
-                        inPauseMenu = false; // Quit the game
-                    }
+                        gameRunning = false; // Quit the game
+                        break;
+                        }
+
+                    // Clear pause menu artifacts when exiting
                     if (pauseInput & KEY_A) {
+                        consoleClear();
                         inPauseMenu = false; // Resume the game
-                    }
+                        }
 
                     gfxFlushBuffers(); // Update screen
                     gfxSwapBuffers(); // Swap buffers
@@ -200,8 +206,7 @@ int main() {
             if (allDotsCollected()) {
                 consoleSelect(&bottomScreen);
                 printf("Congratulations! All dots collected!\n");
-                consoleClear();
-                initializeGameMaze(); // Reset the game
+                initializeGameMaze(); // Reset the game maze
                 printf("Press A to start the game again.\n");
                 gameRunning = false; // Reset game state
             } else {
