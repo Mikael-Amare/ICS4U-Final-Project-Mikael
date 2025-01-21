@@ -1,11 +1,20 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
+#include <algorithm> // For std::min
 
-#define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 19
-#define MOVE_DELAY 5 // Adjust this value to change Pac-Man's speed
-#define PADDING_LEFT 10 // Padding to center the game on the screen
+#define SCREEN_WIDTH 50  // Width of the maze
+#define SCREEN_HEIGHT 20 // Height of the maze
+#define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
+#define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
+#define MOVE_DELAY 5 // Delaying PMan movement
+
+// Calculate padding for centering
+#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
+#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+
+const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
+const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
 
 struct PacMan {
     int x, y;
@@ -14,25 +23,25 @@ struct PacMan {
 };
 
 const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
-    "################################################",
-    "# ............................................ #",
-    "# .###. .#### . #### . . . #### . ####. . ####.#",
-    "# .###. .#### . #### . ## . . . . ####. . ####.#",
-    "# . . . .#### . #### . ## . . . . . . . . . . .#",
-    "####### . . . . #### . ## . . . . . . . . . . .#",
-    "####### .#### . #### . ##  ####  #### . . ####.#",
-    "# . . . .#### . #### . ##  ####  #### . . ####.#",
-    "# . . . . . . . . . . . . . . . . . . . . . . .#",
-    "####### . ######################### . ##########",
-    "# . . . . ### . ### . . # . . . . . . . . . . .#",
-    "# . . . . ### . ### . . #  ####  #### . . ####.#",
-    "# . . . . . . . . . . . . . . . . . . . . . . .#",
-    "####### .#### . ### . # . ### . ####. . .#### .#",
-    "####### .#### . ### . # . . . . . . . . . . . .#",
-    "####### .#### . ### . # . . . . . . . . . . . .#",
-    "#       .#### . ### . # . ### . ### . . . ### .#",
-    "#     # . . . . . . . . . . . . . . . . . . . .#",
-    "################################################"
+    "#################################################",
+    "# ............................................. #",
+    "# .###. .#### . #### . . . #### . ####. . ### . #",
+    "# .###. .#### . #### . ## . . . . ####. . ### . #",
+    "# . . . .#### . #### . ## . . . . . . . . . . . #",
+    "####### . . . . #### . ## . . . . . . . . . . . #",
+    "####### .#### . #### . ##  ## . . ### . . ### . #",
+    "# . . . .#### . #### . ##  ## . . ### . . ### . #",
+    "# . . . . . . . . . . . . . . . . . . . . . . . #",
+    "####### . ######################### . ###########",
+    "# . . . . ### . ### . . # . . . . . . . . . . . #",
+    "# . . . . ### . ### . . #  ####  #### . . ####. #",
+    "# . . . . . . . . . . . . . . . . . . . . . . . #",
+    "####### .#### . ### . # . ### . ####. . .#### . #",
+    "####### .#### . ### . # . . . . . . . . . . . . #",
+    "####### .#### . ### . # . . . . . . . . . . . . #",
+    "#       .#### . ### . # . ### . ### . . . ### . #",
+    "#     # . . . . . . . . . . . . . . . . . . . . #",
+    "#################################################"
 };
 
 char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
@@ -42,8 +51,13 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
-        gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Null-terminate
+        // Ensure maze[counter] is appropriately null-terminated after the copy.
+        if (strlen(maze[counter]) > SCREEN_WIDTH) {
+            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
+        } else {
+            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
+        }
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -55,23 +69,15 @@ void drawMaze() {
     consoleClear();
     printf("Score: %d\n", pacman.score);
 
-    // Calculate the starting point to center the maze
-    int startX = PADDING_LEFT;
-
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Draw Pac-Man
+                printf("P"); // Display Pac-Man
             } else {
                 printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
-        printf("\n"); // Move to the next line
-    }
-
-    // Padding the left side for centering
-    for (int i = 0; i < PADDING_LEFT; ++i) {
-        printf(" "); // Print spaces for padding
+        printf("\n"); // New line after each row
     }
 }
 
