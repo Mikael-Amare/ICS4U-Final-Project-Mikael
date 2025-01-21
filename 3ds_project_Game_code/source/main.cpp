@@ -41,8 +41,9 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        // Ensure null termination and avoid truncation
-        snprintf(gameMaze[counter], sizeof(gameMaze[counter]), "%s", maze[counter]);
+        // Use strncpy for safe copying and ensure null-termination
+        strncpy(gameMaze[counter], maze[counter], sizeof(gameMaze[counter]) - 1);
+        gameMaze[counter][sizeof(gameMaze[counter]) - 1] = '\0'; // Ensuring null-termination
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
