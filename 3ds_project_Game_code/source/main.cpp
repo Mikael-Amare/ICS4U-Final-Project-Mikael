@@ -70,6 +70,8 @@ void drawMaze() {
     printf("Score: %d\n", pacman.score);
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        // Start a new line before rendering each row of the maze
+        printf("\x1b[%d;1H", y + 3);  // Start printing from row 3 to leave space for the score
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
                 printf("P"); // Display Pac-Man
@@ -77,7 +79,6 @@ void drawMaze() {
                 printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
-        printf("\n"); // New line after each row
     }
 }
 
