@@ -51,19 +51,17 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+        // Ensure maze[counter] is appropriately null-terminated after the copy.
         if (strlen(maze[counter]) > SCREEN_WIDTH) {
-            printf("Warning: Maze row %d truncated to SCREEN_WIDTH.\n", counter);
+            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
+        } else {
+            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
         }
-        // Ensure remaining spaces are filled
-        for (int col = strlen(gameMaze[counter]); col < SCREEN_WIDTH; ++col) {
-            gameMaze[counter][col] = ' ';
-        }
-        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null-terminate each row
     }
     pacman.score = 0; // Reset score
-    pacman.x = 1;     // Reset Pac-Man's initial position
-    pacman.y = 16;    // Reset Pac-Man's initial position
+    pacman.x = 1; // Reset Pac-Man's initial position
+    pacman.y = 16; // Reset Pac-Man's initial position
 }
 
 void drawMaze() {
@@ -72,7 +70,6 @@ void drawMaze() {
     printf("Score: %d\n", pacman.score);
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        printf("\x1b[%d;%dH", y + 3 + PADDING_TOP / CHARACTER_HEIGHT, PADDING_LEFT / CHARACTER_WIDTH + 1);  // Centered position
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
                 printf("P"); // Display Pac-Man
@@ -80,12 +77,12 @@ void drawMaze() {
                 printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
+        printf("\n"); // New line after each row
     }
 }
 
 void renderPauseMenu() {
     consoleSelect(&topScreen);
-    consoleClear(); // Clear screen before rendering
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
