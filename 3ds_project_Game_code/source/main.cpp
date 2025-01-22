@@ -53,28 +53,23 @@ void initializeGameMaze() {
 }
 
 void drawMaze() {
-    consoleSelect(&topScreen); // Draw on the top screen
+    consoleSelect(&topScreen); // Set drawing to the top screen
     consoleClear(); // Clear the console before drawing
     
-    // Calculate the vertical offset for centering
-    int verticalOffset = (SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2;
-
     printf("Score: %d\n", pacman.score); // Show the score
 
-    // Draw vertical offset space
-    for (int v = 0; v < verticalOffset / CHARACTER_HEIGHT; v++) {
-        printf("\n"); // Add new lines based on the calculated offset
-    }
+    // Set the starting line for maze rendering (based on console height)
+    int startY = 1; // Start drawing maze one line below the score
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        printf("\x1b[%d;1H", startY + y); // Move cursor to the specific position
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Draw Pac-Man
+                printf("P"); // Draw Pac-Man at its position
             } else {
-                printf("%c", gameMaze[y][x]); // Draw maze
+                printf("%c", gameMaze[y][x]); // Draw maze wall or path
             }
         }
-        printf("\n"); // New line after each row
     }
 
     // Flush and swap buffers after drawing the maze
