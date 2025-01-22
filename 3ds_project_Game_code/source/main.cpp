@@ -15,70 +15,64 @@
 
 const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
 const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
-
+PrintConsole topScreen, bottomScreen; // Declare consoles globally
 struct PacMan {
     int x, y;
     char direction;
     int score;
 };
 
-const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
-    "#################################################",
-    "# ............................................. #",
-    "# .###. .#### . #### . . . #### . ####. . ### . #",
-    "# .###. .#### . #### . ## . . . . ####. . ### . #",
-    "# . . . .#### . #### . ## . . . . . . . . . . . #",
-    "####### . . . . #### . ## . . . . . . . . . . . #",
-    "####### .#### . #### . ##  ## . . ### . . ### . #",
-    "# . . . .#### . #### . ##  ## . . ### . . ### . #",
-    "# . . . . . . . . . . . . . . . . . . . . . . . #",
-    "####### . ######################### . ###########",
-    "# . . . . ### . ### . . # . . . . . . . . . . . #",
-    "# . . . . ### . ### . . #  ####  #### . . ####. #",
-    "# . . . . . . . . . . . . . . . . . . . . . . . #",
-    "####### .#### . ### . # . ### . ####. . .#### . #",
-    "####### .#### . ### . # . . . . . . . . . . . . #",
-    "####### .#### . ### . # . . . . . . . . . . . . #",
-    "#       .#### . ### . # . ### . ### . . . ### . #",
-    "#     # . . . . . . . . . . . . . . . . . . . . #",
-    "#################################################"
-};
-
 char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
 
-PrintConsole topScreen, bottomScreen; // Declare consoles globally
-
 void initializeGameMaze() {
-    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        // Ensure maze[counter] is appropriately null-terminated after the copy.
-        if (strlen(maze[counter]) > SCREEN_WIDTH) {
-            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
-        } else {
-            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
-        }
-    }
+    strcpy(gameMaze[0], "#################################################");
+    strcpy(gameMaze[1], "# ............................................. #");
+    strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
+    strcpy(gameMaze[3], "# .###. .#### . #### . ## . . . . ####. . ### . #");
+    strcpy(gameMaze[4], "# . . . .#### . #### . ## . . . . . . . . . . . #");
+    strcpy(gameMaze[5], "####### . . . . #### . ## . . . . . . . . . . . #");
+    strcpy(gameMaze[6], "####### .#### . #### . ##  ## . . ### . . ### . #");
+    strcpy(gameMaze[7], "# . . . .#### . #### . ##  ## . . ### . . ### . #");
+    strcpy(gameMaze[8], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[9], "####### . ######################### . ###########");
+    strcpy(gameMaze[10], "# . . . . ### . ### . . # . . . . . . . . . . . #");
+    strcpy(gameMaze[11], "# . . . . ### . ### . . #  ####  #### . . ####. #");
+    strcpy(gameMaze[12], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[13], "####### .#### . ### . # . ### . ####. . .#### . #");
+    strcpy(gameMaze[14], "####### .#### . ### . # . . . . . . . . . . . . #");
+    strcpy(gameMaze[15], "####### .#### . ### . # . . . . . . . . . . . . #");
+    strcpy(gameMaze[16], "#       .#### . ### . # . ### . ### . . . ### . #");
+    strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[18], "#################################################");
+    
+    // Initialize Pac-Man's starting position, represented by 'P'
+    pacman.x = 1; // Adjust x position if needed
+    pacman.y = 17;  // Adjust y position if needed
     pacman.score = 0; // Reset score
-    pacman.x = 1; // Reset Pac-Man's initial position
-    pacman.y = 16; // Reset Pac-Man's initial position
 }
 
 void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
-    consoleClear();
-    printf("Score: %d\n", pacman.score);
+    consoleClear(); // Clear the console before drawing
+    
+    printf("Score: %d\n", pacman.score); // Show the score
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Display Pac-Man
+                printf("P"); // Draw Pac-Man
             } else {
                 printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
         printf("\n"); // New line after each row
     }
+
+    // Make sure to flush and swap buffers
+    gfxFlushBuffers(); 
+    gfxSwapBuffers(); 
+    gspWaitForVBlank(); 
 }
 
 void renderPauseMenu() {
