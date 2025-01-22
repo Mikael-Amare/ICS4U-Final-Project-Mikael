@@ -122,9 +122,9 @@ bool allDotsCollected() {
 void chooseDifficulty() {
     consoleSelect(&bottomScreen);
     printf("Choose Difficulty:\n");
-    printf("1. Easy (4 min)\n");
-    printf("2. Medium (2.5 min)\n");
-    printf("3. Hard (2 min)\n");
+    printf("A Easy (4 min)\n");
+    printf("B Medium (2.5 min)\n");
+    printf("X Hard (2 min)\n");
 
     while (true) {
         hidScanInput();
