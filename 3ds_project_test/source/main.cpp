@@ -11,11 +11,12 @@
 #define SCREEN_PIXEL_HEIGHT 240 
 #define MOVE_DELAY 5 
 
-#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
-#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+#define CHARACTER_WIDTH 8  
+#define CHARACTER_HEIGHT 16
 
-const int CHARACTER_WIDTH = 8;  
-const int CHARACTER_HEIGHT = 16;
+// Declare screens globally
+ConsoleTop topScreen;
+ConsoleBottom bottomScreen;
 
 class Game;
 
@@ -164,6 +165,11 @@ private:
             gfxSwapBuffers();
             gspWaitForVBlank();
         }
+    }
+
+    void updateGame() {
+        // Update game logic here if necessary
+        // For now, we can leave it empty
     }
 };
 
