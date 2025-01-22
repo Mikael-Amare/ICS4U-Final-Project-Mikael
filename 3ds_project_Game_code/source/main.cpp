@@ -7,14 +7,7 @@
 
 #define SCREEN_WIDTH 50  
 #define SCREEN_HEIGHT 20 
-#define SCREEN_PIXEL_WIDTH 400 
-#define SCREEN_PIXEL_HEIGHT 240 
 #define MOVE_DELAY 5 
-
-#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
-#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
-#define TARGET_FPS 30 // Set your target frames per second
-#define FRAME_DURATION (1000 / TARGET_FPS) // Calculate frame duration in milliseconds
 
 const int CHARACTER_WIDTH = 8;  
 const int CHARACTER_HEIGHT = 16;
@@ -32,6 +25,7 @@ PrintConsole topScreen, bottomScreen;
 int remainingTime = 0; // Variable to track the remaining time
 
 void initializeMaze() {
+    // Initialize maze layout with walls and dots
     strcpy(gameMaze[0], "#################################################");
     strcpy(gameMaze[1], "# ............................................. #");
     strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
@@ -54,7 +48,7 @@ void initializeMaze() {
     
     pacman.score = 0; 
     pacman.x = 1; 
-    pacman.y = 17;
+    pacman.y = 16;
 }
 
 void drawMaze() {
@@ -86,6 +80,7 @@ void drawMaze() {
 
 void renderPauseMenu() {
     consoleSelect(&bottomScreen);
+    consoleClear();
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
@@ -102,10 +97,12 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
+    // Check if the new position is within bounds and not a wall
     if (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#') {
         pacman.x = newX;
         pacman.y = newY;
 
+        // If Pac-Man collects a dot, increase score
         if (gameMaze[newY][newX] == '.') { 
             gameMaze[newY][newX] = ' '; 
             pacman.score += 10; 
@@ -154,6 +151,7 @@ void chooseDifficulty() {
 }
 
 int main() {
+    // Initialize graphics and console
     gfxInitDefault();
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
@@ -162,13 +160,16 @@ int main() {
     printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
-    gfxSetDoubleBuffering(GFX_TOP, true); // Enable double buffering on top screen
-    gfxSetDoubleBuffering(GFX_BOTTOM, true); // Enable double buffering on bottom screen
-    initializeMaze(); // Initialize the maze with the layout
+    // Set up double buffering for both screens
+    gfxSetDoubleBuffering(GFX_TOP, true); 
+    gfxSetDoubleBuffering(GFX_BOTTOM, true); 
+
+    // Initialize game maze
+    initializeMaze(); 
 
     bool gameRunning = false; 
     int moveCounter = 0; 
-    
+
     while (true) {
         auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
         hidScanInput();
@@ -256,7 +257,7 @@ int main() {
             }
         }
 
-        // Calculate how long to wait to maintain the target FPS
+        // Control frame rate to maintain smooth rendering
         auto endTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
         int waitTime = 1000 / 30 - static_cast<int>(frameTime.count()); // Wait time for 30 FPS
