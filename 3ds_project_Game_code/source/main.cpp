@@ -66,19 +66,25 @@ void initializeGameMaze() {
 
 void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
-    consoleClear();
-    printf("Score: %d\n", pacman.score);
+    consoleClear(); // Clear the console before drawing
+    
+    printf("Score: %d\n", pacman.score); // Show the score
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Display Pac-Man
+                printf("P"); // Draw Pac-Man
             } else {
                 printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
         printf("\n"); // New line after each row
     }
+
+    // Make sure to flush and swap buffers
+    gfxFlushBuffers(); 
+    gfxSwapBuffers(); 
+    gspWaitForVBlank(); 
 }
 
 void renderPauseMenu() {
