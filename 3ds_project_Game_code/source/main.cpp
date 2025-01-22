@@ -127,22 +127,22 @@ bool allDotsCollected() {
 void chooseDifficulty() {
     consoleSelect(&bottomScreen);
     printf("Choose Difficulty:\n");
-    printf("1. Easy (4 min)\n");
-    printf("2. Medium (2.5 min)\n");
-    printf("3. Hard (2 min)\n");
+    printf("Press A for Easy (4 min)\n");
+    printf("Press B for Medium (2.5 min)\n");
+    printf("Press X for Hard (2 min)\n");
     gfxFlushBuffers(); // Update screen
 
     while (true) {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        if (kDown & KEY_1) {
+        if (kDown & KEY_A) {
             timerDuration = 240; // 4 min in seconds
             break;
-        } else if (kDown & KEY_2) {
+        } else if (kDown & KEY_B) {
             timerDuration = 150; // 2.5 min in seconds
             break;
-        } else if (kDown & KEY_3) {
+        } else if (kDown & KEY_X) {
             timerDuration = 120; // 2 min in seconds
             break;
         }
