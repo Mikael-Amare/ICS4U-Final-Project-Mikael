@@ -58,8 +58,10 @@ void initializeGameMaze() {
 
 void displayTimer() {
     consoleSelect(&bottomScreen);
-    printf("Score: %d\n", pacman.score); // Show the score
-    printf("Time Left: %d seconds\n", timerDuration); // Show remaining time
+    printf("\x1b[0;0H"); // Move cursor to the start of the bottom screen
+    printf("Score: %d", pacman.score); // Show the score
+    printf("\x1b[1;0H"); // Move cursor to the next line
+    printf("Time Left: %d seconds\x1b[K", timerDuration); // Show remaining time and clear the rest of the line
 }
 
 void drawMaze() {
