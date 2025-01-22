@@ -1,31 +1,31 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
-#include <chrono>
-#include <thread>
+#include <algorithm> // For std::min
 
-#define SCREEN_WIDTH 50  
-#define SCREEN_HEIGHT 20 
-#define MOVE_DELAY 5 
+#define SCREEN_WIDTH 50  // Width of the maze
+#define SCREEN_HEIGHT 20 // Height of the maze
+#define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
+#define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
+#define MOVE_DELAY 5 // Delaying PMan movement
 
-const int CHARACTER_WIDTH = 8;  
-const int CHARACTER_HEIGHT = 16;
+// Calculate padding for centering
+#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
+#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
 
+const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
+const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
+PrintConsole topScreen, bottomScreen; // Declare consoles globally
 struct PacMan {
     int x, y;
     char direction;
     int score;
 };
 
-char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Copy for gameplay
+char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
 
-PrintConsole topScreen, bottomScreen; 
-int remainingTime = 0; // Variable to track the remaining time
-
-void initializeMaze() {
-    // Initialize maze layout with walls and dots
+void initializeGameMaze() {
     strcpy(gameMaze[0], "#################################################");
     strcpy(gameMaze[1], "# ............................................. #");
     strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
@@ -46,33 +46,30 @@ void initializeMaze() {
     strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
     strcpy(gameMaze[18], "#################################################");
     
-    pacman.score = 0; 
-    pacman.x = 1; 
-    pacman.y = 16;
+    // Initialize Pac-Man's starting position, represented by 'P'
+    pacman.x = 1; // Adjust x position if needed
+    pacman.y = 17;  // Adjust y position if needed
+    pacman.score = 0; // Reset score
 }
 
 void drawMaze() {
-    // Clear the top screen
-    consoleSelect(&topScreen);
-    consoleClear();
+    consoleSelect(&topScreen); // Draw on the top screen
+    consoleClear(); // Clear the console before drawing
+    
+    printf("Score: %d\n", pacman.score); // Show the score
 
-    // Print score and time on top screen
-    printf("Score: %d\n", pacman.score);
-    printf("Time: %d seconds\n", remainingTime); // Show remaining time
-
-    // Print the maze one character at a time
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            // Move the cursor to the correct position
-            printf("\x1b[%d;%dH", y + 3, x + 1); // Adjusting y + 3 to account for the score display
             if (x == pacman.x && y == pacman.y) {
                 printf("P"); // Draw Pac-Man
             } else {
-                printf("%c", gameMaze[y][x]); // Print maze character
+                printf("%c", gameMaze[y][x]); // Draw maze
             }
         }
+        printf("\n"); // New line after each row
     }
 
+    // Flush and swap buffers after drawing the maze
     gfxFlushBuffers(); 
     gfxSwapBuffers(); 
     gspWaitForVBlank(); 
@@ -80,10 +77,12 @@ void drawMaze() {
 
 void renderPauseMenu() {
     consoleSelect(&bottomScreen);
-    consoleClear();
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
+    gfxFlushBuffers(); // Flush to update pause menu
+    gfxSwapBuffers(); // Swap buffers to show pause menu
+    gspWaitForVBlank(); // Wait for vertical sync
 }
 
 void movePacMan() {
@@ -97,15 +96,14 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
-    // Check if the new position is within bounds and not a wall
+    // Ensure the new position is within bounds and not a wall
     if (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#') {
         pacman.x = newX;
         pacman.y = newY;
 
-        // If Pac-Man collects a dot, increase score
-        if (gameMaze[newY][newX] == '.') { 
-            gameMaze[newY][newX] = ' '; 
-            pacman.score += 10; 
+        if (gameMaze[newY][newX] == '.') { // Collect pellet
+            gameMaze[newY][newX] = ' '; // Clear pellet
+            pacman.score += 10; // Update score
         }
     }
 }
@@ -113,159 +111,105 @@ void movePacMan() {
 bool allDotsCollected() {
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            if (gameMaze[y][x] == '.') {
-                return false; 
+            if (gameMaze[y][x] == '.') { // If there's a dot
+                return false; // Not all dots collected
             }
         }
     }
-    return true; 
-}
-
-// Function to choose difficulty
-void chooseDifficulty() {
-    consoleSelect(&bottomScreen);
-    consoleClear(); // Clear the bottom screen for a fresh display
-    printf("Choose Difficulty:\n");
-    printf("A Easy (4 min)\n");
-    printf("B Medium (2.5 min)\n");
-    printf("X Hard (2 min)\n");
-    printf("Press A, B or X to select.\n");
-
-    while (true) {
-        hidScanInput();
-        u32 kDown = hidKeysDown();
-        if (kDown & KEY_A) { 
-            remainingTime = 240; // Easy: 4 min
-            break; 
-        } else if (kDown & KEY_B) {
-            remainingTime = 150; // Medium: 2.5 min
-            break;
-        } else if (kDown & KEY_X) {
-            remainingTime = 120; // Hard: 2 min
-            break;
-        }
-        gfxFlushBuffers();
-        gfxSwapBuffers();
-        gspWaitForVBlank();
-    }
+    return true; // All dots are collected
 }
 
 int main() {
-    // Initialize graphics and console
     gfxInitDefault();
+
+    // Initialize consoles for both screens
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
+
+    // Static text on the bottom screen
     consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
-    // Set up double buffering for both screens
-    gfxSetDoubleBuffering(GFX_TOP, true); 
-    gfxSetDoubleBuffering(GFX_BOTTOM, true); 
+    // Disable double buffering for the bottom screen (static text won't need updates)
+    gfxSetDoubleBuffering(GFX_BOTTOM, false);
+    initializeGameMaze(); // Initialize the maze before the game loop
 
-    // Initialize game maze
-    initializeMaze(); 
+    bool gameRunning = false; // Flag to track whether the game is running
+    int moveCounter = 0; // Timer for movement delay
 
-    bool gameRunning = false; 
-    int moveCounter = 0; 
-
-    while (true) {
-        auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
+    while (aptMainLoop()) {
         hidScanInput();
-        u32 kDown = hidKeysDown(); // Capture key states
+        u32 kDown = hidKeysDown();
 
-        if (gameRunning) {
-            if (remainingTime > 0) {
-                // Check for directional inputs
-                if (kDown & KEY_UP) {
-                    pacman.direction = 'U';
-                }
-                if (kDown & KEY_DOWN) {
-                    pacman.direction = 'D';
-                }
-                if (kDown & KEY_LEFT) {
-                    pacman.direction = 'L';
-                }
-                if (kDown & KEY_RIGHT) {
-                    pacman.direction = 'R';
-                }
+        // Exit the loop on START key press
+        if (kDown & KEY_START) break;
 
-                moveCounter++;
-                if (moveCounter >= MOVE_DELAY) {
-                    movePacMan(); 
-                    moveCounter = 0; 
-                }
-
-                // Decrement timer every second (60 frames ~= 1 second)
-                static int frameCount = 0;
-                frameCount++;
-                if (frameCount >= 60) { // Every 60 frames
-                    remainingTime--;
-                    frameCount = 0; 
-                }
-
-                // Pause game if SELECT button is pressed
-                if (kDown & KEY_SELECT) {
-                    renderPauseMenu();
-                    bool inPauseMenu = true; 
-                    while (inPauseMenu) {
-                        hidScanInput(); 
-                        u32 pauseInput = hidKeysDown();
-                        renderPauseMenu(); 
-
-                        if (pauseInput & KEY_START) {
-                            gameRunning = false; 
-                            break;
-                        }
-
-                        if (pauseInput & KEY_A) {
-                            consoleClear();
-                            inPauseMenu = false; 
-                        }
-
-                        gfxFlushBuffers();
-                        gfxSwapBuffers();
-                        gspWaitForVBlank();
-                    }
-                }
-
-                if (allDotsCollected()) {
-                    consoleSelect(&bottomScreen);
-                    printf("Congratulations! All dots collected!\n");
-                    initializeMaze(); // Reset the maze
-                    printf("Press A to start the game again.\n");
-                    gameRunning = false; 
-                } else {
-                    drawMaze();
-                }
-            } else {
-                consoleSelect(&bottomScreen);
-                printf("Game Over! Time's up!\n");
-                printf("Press A to restart.\n");
-                gameRunning = false; // Reset game state
-            }
-        } else {
-            if (kDown & KEY_START) break;
-
-            if (kDown & KEY_A) {
-                chooseDifficulty(); // Select difficulty before starting the game
-                gameRunning = true; 
-                consoleClear(); 
-                consoleSelect(&bottomScreen);
-                printf("Game started! Use arrows to move Pac-Man.\n");
-            }
+        // Start the game if A is pressed
+        if (kDown & KEY_A && !gameRunning) {
+            gameRunning = true; // Set the game running flag
+            consoleClear(); // Clear bottom console
+            consoleSelect(&bottomScreen);
+            printf("Game started! Use arrows to move Pac-Man.\n");
         }
 
-        // Control frame rate to maintain smooth rendering
-        auto endTime = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
-        int waitTime = 1000 / 30 - static_cast<int>(frameTime.count()); // Wait time for 30 FPS
-        if (waitTime > 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime)); // Sleep to limit FPS
+        // If the game is running, process game logic
+        if (gameRunning) {
+            // Check for directional inputs
+            if (kDown & KEY_UP) pacman.direction = 'U';
+            if (kDown & KEY_DOWN) pacman.direction = 'D';
+            if (kDown & KEY_LEFT) pacman.direction = 'L';
+            if (kDown & KEY_RIGHT) pacman.direction = 'R';
+
+            // Increment the move counter
+            moveCounter++;
+            if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
+                movePacMan(); // Move Pac-Man based on direction
+                moveCounter = 0; // Reset the move counter
+            }
+
+            // Pause game if SELECT button is pressed
+            if (kDown & KEY_SELECT) {
+                renderPauseMenu();
+                bool inPauseMenu = true; // Set the pause state
+                while (inPauseMenu) {
+                    hidScanInput(); // Scan for input
+                    u32 pauseInput = hidKeysDown();
+                    renderPauseMenu(); // Draw the pause menu
+
+                    // Check for input to exit the pause menu
+                    if (pauseInput & KEY_START) {
+                        gameRunning = false; // Quit the game
+                        break;
+                    }
+
+                    // Clear pause menu artifacts when exiting
+                    if (pauseInput & KEY_A) {
+                        consoleClear();
+                        inPauseMenu = false; // Resume the game
+                    }
+
+                    gfxFlushBuffers(); // Update screen
+                    gfxSwapBuffers(); // Swap buffers to display
+                    gspWaitForVBlank(); // Wait for vertical sync
+                }
+            }
+
+            // Check if all dots are collected
+            if (allDotsCollected()) {
+                consoleSelect(&bottomScreen);
+                printf("Congratulations! All dots collected!\n");
+                initializeGameMaze(); // Reset the game maze
+                printf("Press A to start the game again.\n");
+                gameRunning = false; // Reset game state
+            } else {
+                // Switch to the top screen to draw the game
+                drawMaze(); // Draw the maze with Pac-Man
+            }
         }
     }
 
-    gfxExit(); 
-    return 0; 
+    gfxExit(); // Clean up graphics before exiting
+    return 0; // Return success
 }
