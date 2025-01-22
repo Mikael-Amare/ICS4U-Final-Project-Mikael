@@ -57,14 +57,6 @@ void initializeGameMaze() {
     pacman.score = 0; // Reset score
 }
 
-void displayTimer() {
-    consoleSelect(&bottomScreen);
-    printf("\x1b[0;0H"); // Move cursor to the start of the bottom screen
-    printf("Score: %d", pacman.score); // Show the score
-    printf("\x1b[1;0H"); // Move cursor to the next line
-    printf("Time Left: %d seconds\x1b[K", timerDuration); // Show remaining time and clear the rest of the line
-}
-
 void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
     consoleClear(); // Clear the console before drawing
@@ -156,7 +148,15 @@ void countdownTimer() {
     while (timerDuration > 0) {
         std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for 1 second
         timerDuration--; // Decrease timer duration
-        displayTimer(); // Update the display with the new timer value
+        
+        // Redraw the bottom screen for timer display
+        consoleSelect(&bottomScreen);
+        consoleClear(); // Clear the bottom screen
+        printf("Score: %d", pacman.score); // Show the score
+        printf("\x1b[1;0H"); // Move cursor to the next line
+        printf("Time Left: %d seconds\x1b[K", timerDuration); // Show remaining time
+        gfxFlushBuffers(); // Update the display
+        gfxSwapBuffers(); // Show the updated timer
     }
     gameRunning = false; // Set the game to end once the timer is up
     renderGameOver(); // Show game over message
@@ -231,9 +231,6 @@ int main() {
                     drawMaze(); // Draw the maze with Pac-Man
                 }
             }
-
-            // Update the timer display
-            displayTimer(); // Show updated timer on the bottom screen
         }
 
         // Restart game if A is pressed after game over
