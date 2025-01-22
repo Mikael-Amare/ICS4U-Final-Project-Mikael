@@ -149,18 +149,18 @@ void chooseDifficulty() {
 }
 
 int main() {
-    // Initialize graphics
     gfxInitDefault();
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
 
-    // Enable double buffering for top screen
+    // Enable double buffering for the bottom screen and top screen
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
     gfxSetDoubleBuffering(GFX_TOP, true); 
 
-    // Initialization
-    initializeMaze(); 
-    bool gameRunning = false;
+    // Initialize variables
+    initializeMaze(); // Initialize the maze layout
+    bool gameRunning = false; 
+    int moveCounter = 0; // Declare moveCounter here
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -169,8 +169,8 @@ int main() {
         if (kDown & KEY_START) break;
 
         if (kDown & KEY_A && !gameRunning) {
-            chooseDifficulty(); 
-            gameRunning = true;
+            chooseDifficulty(); // Select difficulty before starting the game
+            gameRunning = true; 
             consoleClear(); 
             consoleSelect(&bottomScreen);
             printf("Game started! Use arrows to move Pac-Man.\n");
@@ -178,7 +178,7 @@ int main() {
 
         if (gameRunning) {
             if (remainingTime > 0) {
-                // Directional inputs
+                // Check for directional inputs
                 if (kDown & KEY_UP) pacman.direction = 'U';
                 if (kDown & KEY_DOWN) pacman.direction = 'D';
                 if (kDown & KEY_LEFT) pacman.direction = 'L';
@@ -187,18 +187,18 @@ int main() {
                 moveCounter++;
                 if (moveCounter >= MOVE_DELAY) {
                     movePacMan(); 
-                    moveCounter = 0; 
+                    moveCounter = 0; // Reset counter after moving Pac-Man
                 }
 
                 // Timer decrement every second
                 static int frameCount = 0;
                 frameCount++;
-                if (frameCount >= 60) { // Every 60 frames ~ 1 second
+                if (frameCount >= 60) { // Every 60 frames
                     remainingTime--;
                     frameCount = 0; 
                 }
 
-                // Check for pause
+                // Pause game if SELECT button is pressed
                 if (kDown & KEY_SELECT) {
                     renderPauseMenu();
                     bool inPauseMenu = true; 
@@ -226,11 +226,11 @@ int main() {
                 if (allDotsCollected()) {
                     consoleSelect(&bottomScreen);
                     printf("Congratulations! All dots collected!\n");
-                    initializeMaze(); 
+                    initializeMaze(); // Reset the maze
                     printf("Press A to start the game again.\n");
                     gameRunning = false; 
                 } else {
-                    drawMaze(); // Draw the maze with Pac-Man
+                    drawMaze();
                 }
             } else {
                 consoleSelect(&bottomScreen);
