@@ -69,7 +69,7 @@ void drawMaze() {
         printf("\n"); // New line after each row
     }
 
-    // Make sure to flush and swap buffers
+    // Flush and swap buffers after drawing the maze
     gfxFlushBuffers(); 
     gfxSwapBuffers(); 
     gspWaitForVBlank(); 
@@ -80,6 +80,9 @@ void renderPauseMenu() {
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
+    gfxFlushBuffers(); // Flush to update pause menu
+    gfxSwapBuffers(); // Swap buffers to show pause menu
+    gspWaitForVBlank(); // Wait for vertical sync
 }
 
 void movePacMan() {
@@ -179,16 +182,16 @@ int main() {
                     if (pauseInput & KEY_START) {
                         gameRunning = false; // Quit the game
                         break;
-                        }
+                    }
 
                     // Clear pause menu artifacts when exiting
                     if (pauseInput & KEY_A) {
                         consoleClear();
                         inPauseMenu = false; // Resume the game
-                        }
+                    }
 
                     gfxFlushBuffers(); // Update screen
-                    gfxSwapBuffers(); // Swap buffers
+                    gfxSwapBuffers(); // Swap buffers to display
                     gspWaitForVBlank(); // Wait for vertical sync
                 }
             }
@@ -203,10 +206,6 @@ int main() {
             } else {
                 // Switch to the top screen to draw the game
                 drawMaze(); // Draw the maze with Pac-Man
-
-                gfxFlushBuffers(); // Flush the graphics buffers
-                gfxSwapBuffers(); // Swap the buffers to display
-                gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
             }
         }
     }
