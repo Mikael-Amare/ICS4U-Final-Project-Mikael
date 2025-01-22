@@ -1,31 +1,35 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
-#include <algorithm> // For std::min
+#include <algorithm>
+#include <chrono>
+#include <thread>
 
-#define SCREEN_WIDTH 50  // Width of the maze
-#define SCREEN_HEIGHT 20 // Height of the maze
-#define SCREEN_PIXEL_WIDTH 400 // 3DS screen width in pixels
-#define SCREEN_PIXEL_HEIGHT 240 // 3DS screen height in pixels
-#define MOVE_DELAY 5 // Delaying PMan movement
+#define SCREEN_WIDTH 50  
+#define SCREEN_HEIGHT 20 
+#define SCREEN_PIXEL_WIDTH 400 
+#define SCREEN_PIXEL_HEIGHT 240 
+#define MOVE_DELAY 5 
 
-// Calculate padding for centering
 #define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
 #define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
 
-const int CHARACTER_WIDTH = 8;  // Width of each character in pixels (adjust based on your font)
-const int CHARACTER_HEIGHT = 16; // Height of each character in pixels
-PrintConsole topScreen, bottomScreen; // Declare consoles globally
+const int CHARACTER_WIDTH = 8;  
+const int CHARACTER_HEIGHT = 16;
+
 struct PacMan {
     int x, y;
     char direction;
     int score;
 };
 
-char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
+char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Copy for gameplay
 PacMan pacman = {1, 16, 'R', 0};
 
-void initializeGameMaze() {
+PrintConsole topScreen, bottomScreen; 
+int remainingTime = 0; // Variable to track the remaining time
+
+void initializeMaze() {
     strcpy(gameMaze[0], "#################################################");
     strcpy(gameMaze[1], "# ............................................. #");
     strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
@@ -46,33 +50,31 @@ void initializeGameMaze() {
     strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
     strcpy(gameMaze[18], "#################################################");
     
-    // Initialize Pac-Man's starting position, represented by 'P'
-    pacman.x = 1; // Adjust x position if needed
-    pacman.y = 17;  // Adjust y position if needed
-    pacman.score = 0; // Reset score
+    pacman.score = 0; 
+    pacman.x = 1; 
+    pacman.y = 16;
 }
 
 void drawMaze() {
-    consoleSelect(&topScreen); // Set drawing to the top screen
-    consoleClear(); // Clear the console before drawing
+    // Clear the top screen
+    consoleSelect(&topScreen);
+    consoleClear();
     
-    printf("Score: %d\n", pacman.score); // Show the score
+    // Print score and time on top screen
+    printf("Score: %d\n", pacman.score);
+    printf("Time: %d seconds\n", remainingTime); // Show remaining time
 
-    // Set the starting line for maze rendering (based on console height)
-    int startY = 1; // Start drawing maze one line below the score
-
+    // Print the maze
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        printf("\x1b[%d;1H", startY + y); // Move cursor to the specific position
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            if (x == pacman.x && y == pacman.y) {
-                printf("P"); // Draw Pac-Man at its position
-            } else {
-                printf("%c", gameMaze[y][x]); // Draw maze wall or path
-            }
-        }
+        printf("%s\n", gameMaze[y]); // Print each row of the maze
     }
 
-    // Flush and swap buffers after drawing the maze
+    // Draw Pac-Man on the maze
+    // This prevents the character from being drawn outside of the maze bounds
+    if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
+        printf("\x1b[%d;%dHP", pacman.y + 1, pacman.x + 1); // Move cursor to Pac-Man's position
+    }
+
     gfxFlushBuffers(); 
     gfxSwapBuffers(); 
     gspWaitForVBlank(); 
@@ -83,9 +85,6 @@ void renderPauseMenu() {
     printf("\x1b[10;10H--- PAUSE MENU ---");
     printf("\x1b[12;10HPress A to Resume");
     printf("\x1b[14;10HPress START to Quit");
-    gfxFlushBuffers(); // Flush to update pause menu
-    gfxSwapBuffers(); // Swap buffers to show pause menu
-    gspWaitForVBlank(); // Wait for vertical sync
 }
 
 void movePacMan() {
@@ -99,14 +98,13 @@ void movePacMan() {
         case 'R': newX++; break;
     }
 
-    // Ensure the new position is within bounds and not a wall
     if (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#') {
         pacman.x = newX;
         pacman.y = newY;
 
-        if (gameMaze[newY][newX] == '.') { // Collect pellet
-            gameMaze[newY][newX] = ' '; // Clear pellet
-            pacman.score += 10; // Update score
+        if (gameMaze[newY][newX] == '.') { 
+            gameMaze[newY][newX] = ' '; 
+            pacman.score += 10; 
         }
     }
 }
@@ -114,105 +112,136 @@ void movePacMan() {
 bool allDotsCollected() {
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            if (gameMaze[y][x] == '.') { // If there's a dot
-                return false; // Not all dots collected
+            if (gameMaze[y][x] == '.') {
+                return false; 
             }
         }
     }
-    return true; // All dots are collected
+    return true; 
+}
+
+// Function to choose difficulty
+void chooseDifficulty() {
+    consoleSelect(&bottomScreen);
+    printf("Choose Difficulty:\n");
+    printf("A Easy (4 min)\n");
+    printf("B Medium (2.5 min)\n");
+    printf("X Hard (2 min)\n");
+
+    while (true) {
+        hidScanInput();
+        u32 kDown = hidKeysDown();
+        if (kDown & KEY_A) { 
+            remainingTime = 240; // Easy: 4 min
+            break; 
+        } else if (kDown & KEY_B) {
+            remainingTime = 150; // Medium: 2.5 min
+            break;
+        } else if (kDown & KEY_X) {
+            remainingTime = 120; // Hard: 2 min
+            break;
+        }
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+        gspWaitForVBlank();
+    }
 }
 
 int main() {
     gfxInitDefault();
-
-    // Initialize consoles for both screens
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
-
-    // Static text on the bottom screen
     consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
-    // Disable double buffering for the bottom screen (static text won't need updates)
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    initializeGameMaze(); // Initialize the maze before the game loop
+    gfxSetDoubleBuffering(GFX_TOP, true); // Enable double buffering on top screen
+    initializeMaze(); // Initialize the maze with the layout
 
-    bool gameRunning = false; // Flag to track whether the game is running
-    int moveCounter = 0; // Timer for movement delay
+    bool gameRunning = false; 
+    int moveCounter = 0; 
 
     while (aptMainLoop()) {
         hidScanInput();
         u32 kDown = hidKeysDown();
 
-        // Exit the loop on START key press
         if (kDown & KEY_START) break;
 
-        // Start the game if A is pressed
         if (kDown & KEY_A && !gameRunning) {
-            gameRunning = true; // Set the game running flag
-            consoleClear(); // Clear bottom console
+            chooseDifficulty(); // Select difficulty before starting the game
+            gameRunning = true; 
+            consoleClear(); 
             consoleSelect(&bottomScreen);
             printf("Game started! Use arrows to move Pac-Man.\n");
         }
 
-        // If the game is running, process game logic
         if (gameRunning) {
-            // Check for directional inputs
-            if (kDown & KEY_UP) pacman.direction = 'U';
-            if (kDown & KEY_DOWN) pacman.direction = 'D';
-            if (kDown & KEY_LEFT) pacman.direction = 'L';
-            if (kDown & KEY_RIGHT) pacman.direction = 'R';
+            if (remainingTime > 0) {
+                // Check for directional inputs
+                if (kDown & KEY_UP) pacman.direction = 'U';
+                if (kDown & KEY_DOWN) pacman.direction = 'D';
+                if (kDown & KEY_LEFT) pacman.direction = 'L';
+                if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-            // Increment the move counter
-            moveCounter++;
-            if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
-                movePacMan(); // Move Pac-Man based on direction
-                moveCounter = 0; // Reset the move counter
-            }
-
-            // Pause game if SELECT button is pressed
-            if (kDown & KEY_SELECT) {
-                renderPauseMenu();
-                bool inPauseMenu = true; // Set the pause state
-                while (inPauseMenu) {
-                    hidScanInput(); // Scan for input
-                    u32 pauseInput = hidKeysDown();
-                    renderPauseMenu(); // Draw the pause menu
-
-                    // Check for input to exit the pause menu
-                    if (pauseInput & KEY_START) {
-                        gameRunning = false; // Quit the game
-                        break;
-                    }
-
-                    // Clear pause menu artifacts when exiting
-                    if (pauseInput & KEY_A) {
-                        consoleClear();
-                        inPauseMenu = false; // Resume the game
-                    }
-
-                    gfxFlushBuffers(); // Update screen
-                    gfxSwapBuffers(); // Swap buffers to display
-                    gspWaitForVBlank(); // Wait for vertical sync
+                moveCounter++;
+                if (moveCounter >= MOVE_DELAY) {
+                    movePacMan(); 
+                    moveCounter = 0; 
                 }
-            }
 
-            // Check if all dots are collected
-            if (allDotsCollected()) {
-                consoleSelect(&bottomScreen);
-                printf("Congratulations! All dots collected!\n");
-                initializeGameMaze(); // Reset the game maze
-                printf("Press A to start the game again.\n");
-                gameRunning = false; // Reset game state
+                // Decrement timer every second (60 frames ~= 1 second)
+                static int frameCount = 0;
+                frameCount++;
+                if (frameCount >= 60) { // Every 60 frames
+                    remainingTime--;
+                    frameCount = 0; 
+                }
+
+                // Pause game if SELECT button is pressed
+                if (kDown & KEY_SELECT) {
+                    renderPauseMenu();
+                    bool inPauseMenu = true; 
+                    while (inPauseMenu) {
+                        hidScanInput(); 
+                        u32 pauseInput = hidKeysDown();
+                        renderPauseMenu(); 
+
+                        if (pauseInput & KEY_START) {
+                            gameRunning = false; 
+                            break;
+                        }
+
+                        if (pauseInput & KEY_A) {
+                            consoleClear();
+                            inPauseMenu = false; 
+                        }
+
+                        gfxFlushBuffers();
+                        gfxSwapBuffers();
+                        gspWaitForVBlank();
+                    }
+                }
+
+                if (allDotsCollected()) {
+                    consoleSelect(&bottomScreen);
+                    printf("Congratulations! All dots collected!\n");
+                    initializeMaze(); // Reset the maze
+                    printf("Press A to start the game again.\n");
+                    gameRunning = false; 
+                } else {
+                    drawMaze();
+                }
             } else {
-                // Switch to the top screen to draw the game
-                drawMaze(); // Draw the maze with Pac-Man
+                consoleSelect(&bottomScreen);
+                printf("Game Over! Time's up!\n");
+                printf("Press A to restart.\n");
+                gameRunning = false; // Reset game state
             }
         }
     }
 
-    gfxExit(); // Clean up graphics before exiting
-    return 0; // Return success
+    gfxExit(); 
+    return 0; 
 }
