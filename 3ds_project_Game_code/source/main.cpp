@@ -128,10 +128,12 @@ bool allDotsCollected() {
 // Function to choose difficulty
 void chooseDifficulty() {
     consoleSelect(&bottomScreen);
+    consoleClear(); // Clear the bottom screen for a fresh display
     printf("Choose Difficulty:\n");
     printf("A Easy (4 min)\n");
     printf("B Medium (2.5 min)\n");
     printf("X Hard (2 min)\n");
+    printf("Press A, B or X to select.\n");
 
     while (true) {
         hidScanInput();
@@ -167,6 +169,24 @@ int main() {
 
     bool gameRunning = false; 
     int moveCounter = 0; 
+    
+    while (true) {
+        auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
+
+        // Update game logic here (move Pac-Man, check collisions, etc.)
+        
+        // Call the drawing function to render the maze
+        drawMaze();
+
+        // Calculate how long to wait to maintain the target FPS
+        auto endTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
+        int waitTime = FRAME_DURATION - static_cast<int>(frameTime.count());
+        if (waitTime > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime)); // Sleep to limit FPS
+        }
+    }
+
 
     while (aptMainLoop()) {
         hidScanInput();
