@@ -23,43 +23,33 @@ struct PacMan {
     int score;
 };
 
-const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
-    "#################################################",
-    "# ............................................. #",
-    "# .###. .#### . #### . . . #### . ####. . ### . #",
-    "# .###. .#### . #### . ## . . . . ####. . ### . #",
-    "# . . . .#### . #### . ## . . . . . . . . . . . #",
-    "####### . . . . #### . ## . . . . . . . . . . . #",
-    "####### .#### . #### . ##  ## . . ### . . ### . #",
-    "# . . . .#### . #### . ##  ## . . ### . . ### . #",
-    "# . . . . . . . . . . . . . . . . . . . . . . . #",
-    "####### . ######################### . ###########",
-    "# . . . . ### . ### . . # . . . . . . . . . . . #",
-    "# . . . . ### . ### . . #  ####  #### . . ####. #",
-    "# . . . . . . . . . . . . . . . . . . . . . . . #",
-    "####### .#### . ### . # . ### . ####. . .#### . #",
-    "####### .#### . ### . # . . . . . . . . . . . . #",
-    "####### .#### . ### . # . . . . . . . . . . . . #",
-    "#       .#### . ### . # . ### . ### . . . ### . #",
-    "#     # . . . . . . . . . . . . . . . . . . . . #",
-    "#################################################"
-};
-
-char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; 
+char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Copy for gameplay
 PacMan pacman = {1, 16, 'R', 0};
 
 PrintConsole topScreen, bottomScreen; 
 int remainingTime = 0; // Variable to track the remaining time
 
-void initializeGameMaze() {
-    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
-        if (strlen(maze[counter]) > SCREEN_WIDTH) {
-            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-            gameMaze[counter][SCREEN_WIDTH] = '\0'; 
-        } else {
-            strcpy(gameMaze[counter], maze[counter]);
-        }
-    }
+void initializeMaze() {
+    strcpy(gameMaze[0], "#################################################");
+    strcpy(gameMaze[1], "# ............................................. #");
+    strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
+    strcpy(gameMaze[3], "# .###. .#### . #### . ## . . . . ####. . ### . #");
+    strcpy(gameMaze[4], "# . . . .#### . #### . ## . . . . . . . . . . . #");
+    strcpy(gameMaze[5], "####### . . . . #### . ## . . . . . . . . . . . #");
+    strcpy(gameMaze[6], "####### .#### . #### . ##  ## . . ### . . ### . #");
+    strcpy(gameMaze[7], "# . . . .#### . #### . ##  ## . . ### . . ### . #");
+    strcpy(gameMaze[8], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[9], "####### . ######################### . ###########");
+    strcpy(gameMaze[10], "# . . . . ### . ### . . # . . . . . . . . . . . #");
+    strcpy(gameMaze[11], "# . . . . ### . ### . . #  ####  #### . . ####. #");
+    strcpy(gameMaze[12], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[13], "####### .#### . ### . # . ### . ####. . .#### . #");
+    strcpy(gameMaze[14], "####### .#### . ### . # . . . . . . . . . . . . #");
+    strcpy(gameMaze[15], "####### .#### . ### . # . . . . . . . . . . . . #");
+    strcpy(gameMaze[16], "#       .#### . ### . # . ### . ### . . . ### . #");
+    strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
+    strcpy(gameMaze[18], "#################################################");
+    
     pacman.score = 0; 
     pacman.x = 1; 
     pacman.y = 16;
@@ -165,7 +155,8 @@ int main() {
     printf("Press START to exit.\n");
 
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    initializeGameMaze();
+    gfxSetDoubleBuffering(GFX_TOP, true); // Enable double buffering on top screen
+    initializeMaze(); // Initialize the maze with the layout
 
     bool gameRunning = false; 
     int moveCounter = 0; 
@@ -234,7 +225,7 @@ int main() {
                 if (allDotsCollected()) {
                     consoleSelect(&bottomScreen);
                     printf("Congratulations! All dots collected!\n");
-                    initializeGameMaze();
+                    initializeMaze(); // Reset the maze
                     printf("Press A to start the game again.\n");
                     gameRunning = false; 
                 } else {
