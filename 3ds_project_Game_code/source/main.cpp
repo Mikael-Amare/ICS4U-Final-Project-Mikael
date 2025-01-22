@@ -3,17 +3,19 @@
 #include <cstring>
 #include <algorithm>
 #include <chrono>
-#include <atomic>
+#include <thread>
 
-#define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 20
-#define SCREEN_PIXEL_WIDTH 400
-#define SCREEN_PIXEL_HEIGHT 240
-#define MOVE_DELAY 5
+#define SCREEN_WIDTH 50  
+#define SCREEN_HEIGHT 20 
+#define SCREEN_PIXEL_WIDTH 400 
+#define SCREEN_PIXEL_HEIGHT 240 
+#define MOVE_DELAY 5 
 
-const int CHARACTER_WIDTH = 8;
+#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
+#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+
+const int CHARACTER_WIDTH = 8;  
 const int CHARACTER_HEIGHT = 16;
-PrintConsole topScreen, bottomScreen;
 
 struct PacMan {
     int x, y;
@@ -21,121 +23,119 @@ struct PacMan {
     int score;
 };
 
-char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1];
+const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
+    // Maze definition...
+};
+
+char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; 
 PacMan pacman = {1, 16, 'R', 0};
-int timerDuration = 0;
-bool gameRunning = false;
-std::atomic<bool> timerRunning(false);
+
+PrintConsole topScreen, bottomScreen; 
+int remainingTime = 0; // Variable to track the remaining time
 
 void initializeGameMaze() {
-    strcpy(gameMaze[0], "#################################################");
-    strcpy(gameMaze[1], "# ............................................. #");
-    strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
-    strcpy(gameMaze[3], "# .###. .#### . #### . ## . . . . ####. . ### . #");
-    strcpy(gameMaze[4], "# . . . .#### . #### . ## . . . . . . . . . . . #");
-    strcpy(gameMaze[5], "####### . . . . #### . ## . . . . . . . . . . . #");
-    strcpy(gameMaze[6], "####### .#### . #### . ##  ## . . ### . . ### . #");
-    strcpy(gameMaze[7], "# . . . .#### . #### . ##  ## . . ### . . ### . #");
-    strcpy(gameMaze[8], "# . . . . . . . . . . . . . . . . . . . . . . . #");
-    strcpy(gameMaze[9], "####### . ######################### . ###########");
-    strcpy(gameMaze[10], "# . . . . ### . ### . . # . . . . . . . . . . . #");
-    strcpy(gameMaze[11], "# . . . . ### . ### . . #  ####  #### . . ####. #");
-    strcpy(gameMaze[12], "# . . . . . . . . . . . . . . . . . . . . . . . #");
-    strcpy(gameMaze[13], "####### .#### . ### . # . ### . ####. . .#### . #");
-    strcpy(gameMaze[14], "####### .#### . ### . # . . . . . . . . . . . . #");
-    strcpy(gameMaze[15], "####### .#### . ### . # . . . . . . . . . . . . #");
-    strcpy(gameMaze[16], "#       .#### . ### . # . ### . ### . . . ### . #");
-    strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
-    strcpy(gameMaze[18], "#################################################");
-
-    pacman.x = 1;
-    pacman.y = 17;
-    pacman.score = 0;
+    for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
+        if (strlen(maze[counter]) > SCREEN_WIDTH) {
+            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+            gameMaze[counter][SCREEN_WIDTH] = '\0'; 
+        } else {
+            strcpy(gameMaze[counter], maze[counter]);
+        }
+    }
+    pacman.score = 0; 
+    pacman.x = 1; 
+    pacman.y = 16;
 }
 
 void drawMaze() {
-    consoleSelect(&topScreen);
-    consoleClear();
+    consoleSelect(&topScreen); 
+    consoleClear(); 
     
-    printf("\x1b[0;0HScore: %d  Time: %d\n", pacman.score, timerDuration);
-    
+    printf("Score: %d\n", pacman.score); 
+    printf("Time: %d seconds\n", remainingTime); // Show remaining time
+
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (x == pacman.x && y == pacman.y) {
-                printf("C");
+                printf("P");
             } else {
-                printf("%c", gameMaze[y][x]);
+                printf("%c", gameMaze[y][x]); 
             }
         }
-        printf("\n");
+        printf("\n"); 
     }
+
+    gfxFlushBuffers(); 
+    gfxSwapBuffers(); 
+    gspWaitForVBlank(); 
+}
+
+void renderPauseMenu() {
+    consoleSelect(&bottomScreen);
+    printf("\x1b[10;10H--- PAUSE MENU ---");
+    printf("\x1b[12;10HPress A to Resume");
+    printf("\x1b[14;10HPress START to Quit");
 }
 
 void movePacMan() {
     int newX = pacman.x;
     int newY = pacman.y;
 
-    hidScanInput();
-    u32 kHeld = hidKeysHeld();
-    
-    if (kHeld & KEY_UP) {
-        newY--;
-        pacman.direction = 'U';
-    }
-    if (kHeld & KEY_DOWN) {
-        newY++;
-        pacman.direction = 'D';
-    }
-    if (kHeld & KEY_LEFT) {
-        newX--;
-        pacman.direction = 'L';
-    }
-    if (kHeld & KEY_RIGHT) {
-        newX++;
-        pacman.direction = 'R';
+    switch (pacman.direction) {
+        case 'U': newY--; break;
+        case 'D': newY++; break;
+        case 'L': newX--; break;
+        case 'R': newX++; break;
     }
 
     if (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#') {
-        if (gameMaze[newY][newX] == '.') {
-            pacman.score += 10;
-            gameMaze[newY][newX] = ' ';
-        }
         pacman.x = newX;
         pacman.y = newY;
+
+        if (gameMaze[newY][newX] == '.') { 
+            gameMaze[newY][newX] = ' '; 
+            pacman.score += 10; 
+        }
     }
 }
 
 bool allDotsCollected() {
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            if (gameMaze[y][x] == '.') return false;
+            if (gameMaze[y][x] == '.') {
+                return false; 
+            }
         }
     }
-    return true;
+    return true; 
 }
 
+// Function to choose difficulty
 void chooseDifficulty() {
     consoleSelect(&bottomScreen);
-    consoleClear();
-    printf("\x1b[0;0HChoose Difficulty:\n");
-    printf("Press A for Easy (4 min)\n");
-    printf("Press B for Medium (2.5 min)\n");
-    printf("Press X for Hard (2 min)\n");
+    printf("Choose Difficulty:\n");
+    printf("1. Easy (4 min)\n");
+    printf("2. Medium (2.5 min)\n");
+    printf("3. Hard (2 min)\n");
 
     while (true) {
         hidScanInput();
         u32 kDown = hidKeysDown();
-
-        if (kDown & KEY_A) {
-            timerDuration = 240;
-            break;
+        if (kDown & KEY_A) { 
+            // You can also check which number was pressed if needed.
+            // For example, use a numeric key or directional key to set the difficulty.
+            remainingTime = 240; // Easy: 4 min
+            break; 
         } else if (kDown & KEY_B) {
-            timerDuration = 150;
+            remainingTime = 150; // Medium: 2.5 min
             break;
         } else if (kDown & KEY_X) {
-            timerDuration = 120;
+            remainingTime = 120; // Hard: 2 min
             break;
         }
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+        gspWaitForVBlank();
     }
 }
 
@@ -143,14 +143,16 @@ int main() {
     gfxInitDefault();
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
-
     consoleSelect(&bottomScreen);
     printf("Pac-Man on 3DS\n");
     printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
+    gfxSetDoubleBuffering(GFX_BOTTOM, false);
     initializeGameMaze();
-    u64 lastTime = osGetTime();
+
+    bool gameRunning = false; 
+    int moveCounter = 0; 
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -159,41 +161,78 @@ int main() {
         if (kDown & KEY_START) break;
 
         if (kDown & KEY_A && !gameRunning) {
-            consoleClear();
-            initializeGameMaze();
-            chooseDifficulty();
-            gameRunning = true;
-            timerRunning = true;
-            lastTime = osGetTime();
+            chooseDifficulty(); // Select difficulty before starting the game
+            gameRunning = true; 
+            consoleClear(); 
+            consoleSelect(&bottomScreen);
+            printf("Game started! Use arrows to move Pac-Man.\n");
         }
 
         if (gameRunning) {
-            movePacMan();
-            
-            u64 currentTime = osGetTime();
-            if (currentTime - lastTime >= 1000) {
-                if (timerDuration > 0) {
-                    timerDuration--;
+            if (remainingTime > 0) {
+                // Check for directional inputs
+                if (kDown & KEY_UP) pacman.direction = 'U';
+                if (kDown & KEY_DOWN) pacman.direction = 'D';
+                if (kDown & KEY_LEFT) pacman.direction = 'L';
+                if (kDown & KEY_RIGHT) pacman.direction = 'R';
+
+                moveCounter++;
+                if (moveCounter >= MOVE_DELAY) {
+                    movePacMan(); 
+                    moveCounter = 0; 
                 }
-                lastTime = currentTime;
-            }
 
-            if (timerDuration <= 0) {
-                gameRunning = false;
-                consoleSelect(&bottomScreen);
-                printf("\x1b[10;10HGame Over! Press A to play again.");
-            } else if (allDotsCollected()) {
-                gameRunning = false;
-                consoleSelect(&bottomScreen);
-                printf("\x1b[10;10HYou Win! Press A to play again.");
-            }
+                // Decrement timer every second (60 frames ~= 1 second)
+                static int frameCount = 0;
+                frameCount++;
+                if (frameCount >= 60) { // Every 60 frames
+                    remainingTime--;
+                    frameCount = 0; 
+                }
 
-            drawMaze();
+                // Pause game if SELECT button is pressed
+                if (kDown & KEY_SELECT) {
+                    renderPauseMenu();
+                    bool inPauseMenu = true; 
+                    while (inPauseMenu) {
+                        hidScanInput(); 
+                        u32 pauseInput = hidKeysDown();
+                        renderPauseMenu(); 
+
+                        if (pauseInput & KEY_START) {
+                            gameRunning = false; 
+                            break;
+                        }
+
+                        if (pauseInput & KEY_A) {
+                            consoleClear();
+                            inPauseMenu = false; 
+                        }
+
+                        gfxFlushBuffers();
+                        gfxSwapBuffers();
+                        gspWaitForVBlank();
+                    }
+                }
+
+                if (allDotsCollected()) {
+                    consoleSelect(&bottomScreen);
+                    printf("Congratulations! All dots collected!\n");
+                    initializeGameMaze();
+                    printf("Press A to start the game again.\n");
+                    gameRunning = false; 
+                } else {
+                    drawMaze();
+                }
+            } else {
+                consoleSelect(&bottomScreen);
+                printf("Game Over! Time's up!\n");
+                printf("Press A to restart.\n");
+                gameRunning = false; // Reset game state
+            }
         }
-
-        gspWaitForVBlank();
     }
 
-    gfxExit();
-    return 0;
+    gfxExit(); 
+    return 0; 
 }
