@@ -56,7 +56,15 @@ void drawMaze() {
     consoleSelect(&topScreen); // Draw on the top screen
     consoleClear(); // Clear the console before drawing
     
+    // Calculate the vertical offset for centering
+    int verticalOffset = (SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2;
+
     printf("Score: %d\n", pacman.score); // Show the score
+
+    // Draw vertical offset space
+    for (int v = 0; v < verticalOffset / CHARACTER_HEIGHT; v++) {
+        printf("\n"); // Add new lines based on the calculated offset
+    }
 
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
