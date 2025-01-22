@@ -59,8 +59,8 @@ void drawMaze() {
     // Clear the top screen
     consoleSelect(&topScreen);
     consoleClear();
-    
-    // Print score and time on top screen
+
+    // Print score and time on the top screen
     printf("Score: %d\n", pacman.score);
     printf("Time: %d seconds\n", remainingTime); // Show remaining time
 
@@ -70,14 +70,15 @@ void drawMaze() {
     }
 
     // Draw Pac-Man on the maze
-    // This prevents the character from being drawn outside of the maze bounds
+    // Correctly position the cursor at Pac-Man's coordinates
     if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
-        printf("\x1b[%d;%dHP", pacman.y + 1, pacman.x + 1); // Move cursor to Pac-Man's position
+        printf("\x1b[%d;%dHP", pacman.y + 2, pacman.x + 1); // +2 for score space
     }
 
-    gfxFlushBuffers(); 
-    gfxSwapBuffers(); 
-    gspWaitForVBlank(); 
+    // Swap buffers to show the drawn content on the top screen
+    gfxFlushBuffers();
+    gfxSwapBuffers();
+    gspWaitForVBlank();
 }
 
 void renderPauseMenu() {
@@ -148,20 +149,18 @@ void chooseDifficulty() {
 }
 
 int main() {
+    // Initialize graphics
     gfxInitDefault();
     consoleInit(GFX_TOP, &topScreen);
     consoleInit(GFX_BOTTOM, &bottomScreen);
-    consoleSelect(&bottomScreen);
-    printf("Pac-Man on 3DS\n");
-    printf("Press A to start the game.\n");
-    printf("Press START to exit.\n");
 
+    // Enable double buffering for top screen
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    gfxSetDoubleBuffering(GFX_TOP, true); // Enable double buffering on top screen
-    initializeMaze(); // Initialize the maze with the layout
+    gfxSetDoubleBuffering(GFX_TOP, true); 
 
-    bool gameRunning = false; 
-    int moveCounter = 0; 
+    // Initialization
+    initializeMaze(); 
+    bool gameRunning = false;
 
     while (aptMainLoop()) {
         hidScanInput();
@@ -170,8 +169,8 @@ int main() {
         if (kDown & KEY_START) break;
 
         if (kDown & KEY_A && !gameRunning) {
-            chooseDifficulty(); // Select difficulty before starting the game
-            gameRunning = true; 
+            chooseDifficulty(); 
+            gameRunning = true;
             consoleClear(); 
             consoleSelect(&bottomScreen);
             printf("Game started! Use arrows to move Pac-Man.\n");
@@ -179,7 +178,7 @@ int main() {
 
         if (gameRunning) {
             if (remainingTime > 0) {
-                // Check for directional inputs
+                // Directional inputs
                 if (kDown & KEY_UP) pacman.direction = 'U';
                 if (kDown & KEY_DOWN) pacman.direction = 'D';
                 if (kDown & KEY_LEFT) pacman.direction = 'L';
@@ -191,15 +190,15 @@ int main() {
                     moveCounter = 0; 
                 }
 
-                // Decrement timer every second (60 frames ~= 1 second)
+                // Timer decrement every second
                 static int frameCount = 0;
                 frameCount++;
-                if (frameCount >= 60) { // Every 60 frames
+                if (frameCount >= 60) { // Every 60 frames ~ 1 second
                     remainingTime--;
                     frameCount = 0; 
                 }
 
-                // Pause game if SELECT button is pressed
+                // Check for pause
                 if (kDown & KEY_SELECT) {
                     renderPauseMenu();
                     bool inPauseMenu = true; 
@@ -227,17 +226,17 @@ int main() {
                 if (allDotsCollected()) {
                     consoleSelect(&bottomScreen);
                     printf("Congratulations! All dots collected!\n");
-                    initializeMaze(); // Reset the maze
+                    initializeMaze(); 
                     printf("Press A to start the game again.\n");
                     gameRunning = false; 
                 } else {
-                    drawMaze();
+                    drawMaze(); // Draw the maze with Pac-Man
                 }
             } else {
                 consoleSelect(&bottomScreen);
                 printf("Game Over! Time's up!\n");
                 printf("Press A to restart.\n");
-                gameRunning = false; // Reset game state
+                gameRunning = false; 
             }
         }
     }
