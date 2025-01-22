@@ -16,7 +16,6 @@
 #define TARGET_FPS 30 // Set your target frames per second
 #define FRAME_DURATION (1000 / TARGET_FPS) // Calculate frame duration in milliseconds
 
-
 const int CHARACTER_WIDTH = 8;  
 const int CHARACTER_HEIGHT = 16;
 
@@ -173,42 +172,24 @@ int main() {
     while (true) {
         auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
 
-        // Update game logic here (move Pac-Man, check collisions, etc.)
-        
-        // Call the drawing function to render the maze
-        drawMaze();
-
-        // Calculate how long to wait to maintain the target FPS
-        auto endTime = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
-        int waitTime = FRAME_DURATION - static_cast<int>(frameTime.count());
-        if (waitTime > 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime)); // Sleep to limit FPS
-        }
-    }
-
-
-    while (aptMainLoop()) {
-        hidScanInput();
-        u32 kDown = hidKeysDown();
-
-        if (kDown & KEY_START) break;
-
-        if (kDown & KEY_A && !gameRunning) {
-            chooseDifficulty(); // Select difficulty before starting the game
-            gameRunning = true; 
-            consoleClear(); 
-            consoleSelect(&bottomScreen);
-            printf("Game started! Use arrows to move Pac-Man.\n");
-        }
-
         if (gameRunning) {
+            hidScanInput();
+            u32 kDown = hidKeysDown();
+
             if (remainingTime > 0) {
                 // Check for directional inputs
-                if (kDown & KEY_UP) pacman.direction = 'U';
-                if (kDown & KEY_DOWN) pacman.direction = 'D';
-                if (kDown & KEY_LEFT) pacman.direction = 'L';
-                if (kDown & KEY_RIGHT) pacman.direction = 'R';
+                if (kDown & KEY_UP) {
+                    pacman.direction = 'U';
+                }
+                if (kDown & KEY_DOWN) {
+                    pacman.direction = 'D';
+                }
+                if (kDown & KEY_LEFT) {
+                    pacman.direction = 'L';
+                }
+                if (kDown & KEY_RIGHT) {
+                    pacman.direction = 'R';
+                }
 
                 moveCounter++;
                 if (moveCounter >= MOVE_DELAY) {
@@ -221,6 +202,7 @@ int main() {
                 frameCount++;
                 if (frameCount >= 60) { // Every 60 frames
                     remainingTime--;
+                    printf("Remaining Time: %d\n", remainingTime); // Debug line
                     frameCount = 0; 
                 }
 
@@ -264,6 +246,24 @@ int main() {
                 printf("Press A to restart.\n");
                 gameRunning = false; // Reset game state
             }
+        } else {
+            if (kDown & KEY_START) break;
+
+            if (kDown & KEY_A) {
+                chooseDifficulty(); // Select difficulty before starting the game
+                gameRunning = true; 
+                consoleClear(); 
+                consoleSelect(&bottomScreen);
+                printf("Game started! Use arrows to move Pac-Man.\n");
+            }
+        }
+
+        // Calculate how long to wait to maintain the target FPS
+        auto endTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
+        int waitTime = FRAME_DURATION - static_cast<int>(frameTime.count());
+        if (waitTime > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(waitTime)); // Sleep to limit FPS
         }
     }
 
