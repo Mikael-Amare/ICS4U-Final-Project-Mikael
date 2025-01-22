@@ -1,126 +1,212 @@
 #include <3ds.h>
-#include <citro2d.h>
-#include <sfil.h>
 #include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <chrono>
+#include <thread>
 
-// Screen size for rendering
-#define TILE_SIZE 16
-#define SCREEN_WIDTH 50
-#define SCREEN_HEIGHT 20
+#define SCREEN_WIDTH 50  
+#define SCREEN_HEIGHT 20 
+#define SCREEN_PIXEL_WIDTH 400 
+#define SCREEN_PIXEL_HEIGHT 240 
+#define MOVE_DELAY 5 
 
-// PacMan structure
-struct PacMan {
+#define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
+#define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+
+const int CHARACTER_WIDTH = 8;  
+const int CHARACTER_HEIGHT = 16;
+
+class PacMan {
+public:
     int x, y;
     char direction;
-};
+    int score;
 
-// Game maze (simple example)
-const char maze[SCREEN_HEIGHT][SCREEN_WIDTH + 1] = {
-    "##################################################",
-    "#                                                #",
-    "#  ###   ####  ####       ####  ####    ####     #",
-    "#  ###   ####  ####   ##  ####  ####    ####     #",
-    "#        ####  ####   ##                     ####",
-    "#######        ####   ##                     ####",
-    "#######  ####  ####   ##  ####  ####    ####     #",
-    "#       ####   ####   ##  ####  ####    ####     #",
-    "#                                                #",
-    "##################################################"
-};
+    PacMan() : x(1), y(16), direction('R'), score(0) {}
 
-// Initialize PacMan
-PacMan pacman = {1, 1, 'R'};
+    void move() {
+        int newX = x;
+        int newY = y;
 
-// Textures for the game
-sf2d_texture *pacmanTexture = NULL;
-sf2d_texture *wallTexture = NULL;
+        switch (direction) {
+            case 'U': newY--; break;
+            case 'D': newY++; break;
+            case 'L': newX--; break;
+            case 'R': newX++; break;
+        }
 
-// Function to draw the maze and PacMan
-void drawMaze() {
-    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            int drawX = x * TILE_SIZE;
-            int drawY = y * TILE_SIZE;
+        // Check for valid move
+        if (isValidMove(newX, newY)) {
+            x = newX;
+            y = newY;
 
-            // Draw wall or PacMan
-            if (x == pacman.x && y == pacman.y) {
-                sf2d_draw_texture(pacmanTexture, drawX, drawY);
-            } else if (maze[y][x] == '#') {
-                sf2d_draw_texture(wallTexture, drawX, drawY);
+            if (gameMaze[newY][newX] == '.') { 
+                gameMaze[newY][newX] = ' '; 
+                score += 10; 
             }
         }
     }
-}
 
-// Function to handle movement
-void movePacMan() {
-    int newX = pacman.x;
-    int newY = pacman.y;
+private:
+    bool isValidMove(int newX, int newY) {
+        return (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#');
+    }
+};
 
-    switch (pacman.direction) {
-        case 'U': newY--; break;
-        case 'D': newY++; break;
-        case 'L': newX--; break;
-        case 'R': newX++; break;
+class Game {
+public:
+    Game() : remainingTime(0), moveCounter(0), gameRunning(false) {
+        initializeMaze();
     }
 
-    // Check for collisions with walls
-    if (maze[newY][newX] != '#') {
-        pacman.x = newX;
-        pacman.y = newY;
+    void run() {
+        while (aptMainLoop()) {
+            hidScanInput();
+            u32 kDown = hidKeysDown();
+
+            if (kDown & KEY_START) break;
+
+            if (kDown & KEY_A && !gameRunning) {
+                chooseDifficulty();
+                gameRunning = true;
+                consoleClear(); 
+                consoleSelect(&bottomScreen);
+                printf("Game started! Use arrows to move Pac-Man.\n");
+            }
+
+            if (gameRunning) {
+                handleInput(kDown);
+                updateGame();
+                drawMaze();
+            }
+        }
+        gfxExit(); 
     }
-}
+
+private:
+    char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1];
+    PacMan pacman;
+    int remainingTime;
+    int moveCounter;
+    bool gameRunning;
+
+    void initializeMaze() {
+        strcpy(gameMaze[0], "#################################################");
+        strcpy(gameMaze[1], "# ............................................. #");
+        strcpy(gameMaze[2], "# .###. .#### . #### . . . #### . ####. . ### . #");
+        strcpy(gameMaze[3], "# .###. .#### . #### . ## . . . . ####. . ### . #");
+        strcpy(gameMaze[4], "# . . . .#### . #### . ## . . . . . . . . . . . #");
+        strcpy(gameMaze[5], "####### . . . . #### . ## . . . . . . . . . . . #");
+        strcpy(gameMaze[6], "####### .#### . #### . ##  ## . . ### . . ### . #");
+        strcpy(gameMaze[7], "# . . . .#### . #### . ##  ## . . ### . . ### . #");
+        strcpy(gameMaze[8], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+        strcpy(gameMaze[9], "####### . ######################### . ###########");
+        strcpy(gameMaze[10], "# . . . . ### . ### . . # . . . . . . . . . . . #");
+        strcpy(gameMaze[11], "# . . . . ### . ### . . #  ####  #### . . ####. #");
+        strcpy(gameMaze[12], "# . . . . . . . . . . . . . . . . . . . . . . . #");
+        strcpy(gameMaze[13], "####### .#### . ### . # . ### . ####. . .#### . #");
+        strcpy(gameMaze[14], "####### .#### . ### . # . . . . . . . . . . . . #");
+        strcpy(gameMaze[15], "####### .#### . ### . # . . . . . . . . . . . . #");
+        strcpy(gameMaze[16], "#       .#### . ### . # . ### . ### . . . ### . #");
+        strcpy(gameMaze[17], "#     # . . . . . . . . . . . . . . . . . . . . #");
+        strcpy(gameMaze[18], "#################################################");
+
+        pacman.score = 0; 
+        pacman.x = 1; 
+        pacman.y = 16;
+    }
+
+    void drawMaze() {
+        consoleSelect(&topScreen);
+        consoleClear();
+        printf("Score: %d\n", pacman.score);
+        printf("Time: %d seconds\n", remainingTime); 
+
+        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+            printf("%s\n", gameMaze[y]);
+        }
+
+        if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
+            printf("\x1b[%d;%dHP", pacman.y + 2, pacman.x + 1);
+        }
+
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+        gspWaitForVBlank();
+    }
+
+    void handleInput(u32 kDown) {
+        if (remainingTime > 0) {
+            if (kDown & KEY_UP) pacman.direction = 'U';
+            if (kDown & KEY_DOWN) pacman.direction = 'D';
+            if (kDown & KEY_LEFT) pacman.direction = 'L';
+            if (kDown & KEY_RIGHT) pacman.direction = 'R';
+
+            moveCounter++;
+            if (moveCounter >= MOVE_DELAY) {
+                pacman.move(); 
+                moveCounter = 0;
+            }
+
+            static int frameCount = 0;
+            frameCount++;
+            if (frameCount >= 60) { // Every 60 frames
+                remainingTime--;
+                frameCount = 0; 
+            }
+        }
+    }
+
+    void chooseDifficulty() {
+        consoleSelect(&bottomScreen);
+        printf("Choose Difficulty:\n");
+        printf("A Easy (4 min)\n");
+        printf("B Medium (2.5 min)\n");
+        printf("X Hard (2 min)\n");
+
+        while (true) {
+            hidScanInput();
+            u32 kDown = hidKeysDown();
+            if (kDown & KEY_A) { 
+                remainingTime = 240; // Easy: 4 min
+                break; 
+            } else if (kDown & KEY_B) {
+                remainingTime = 150; // Medium: 2.5 min
+                break;
+            } else if (kDown & KEY_X) {
+                remainingTime = 120; // Hard: 2 min
+                break;
+            }
+            gfxFlushBuffers();
+            gfxSwapBuffers();
+            gspWaitForVBlank();
+        }
+    }
+
+    bool allDotsCollected() {
+        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+            for (int x = 0; x < SCREEN_WIDTH; ++x) {
+                if (gameMaze[y][x] == '.') {
+                    return false; 
+                }
+            }
+        }
+        return true; 
+    }
+};
 
 int main() {
-    // Initialize services
     gfxInitDefault();
-    consoleInit(GFX_BOTTOM, NULL); // Use bottom screen for text/debugging
-    sf2d_init();
-    romfsInit();
+    consoleInit(GFX_TOP, &topScreen);
+    consoleInit(GFX_BOTTOM, &bottomScreen);
 
-    // Load textures
-    pacmanTexture = sf2d_load_texture_from_file("romfs:/pacman.t3x");
-    wallTexture = sf2d_load_texture_from_file("romfs:/wall.t3x");
+    // Enable double buffering for the bottom screen and top screen
+    gfxSetDoubleBuffering(GFX_BOTTOM, false);
+    gfxSetDoubleBuffering(GFX_TOP, true); 
 
-    if (!pacmanTexture || !wallTexture) {
-        printf("Failed to load textures.\n");
-        return 1;
-    }
+    Game pacmanGame;
+    pacmanGame.run();
 
-    printf("Pac-Man on 3DS\n");
-    printf("Press START to exit.\n");
-
-    while (aptMainLoop()) {
-        // Scan for input
-        hidScanInput();
-        u32 kDown = hidKeysDown();
-
-        // Exit game
-        if (kDown & KEY_START) break;
-
-        // Change direction
-        if (kDown & KEY_UP) pacman.direction = 'U';
-        if (kDown & KEY_DOWN) pacman.direction = 'D';
-        if (kDown & KEY_LEFT) pacman.direction = 'L';
-        if (kDown & KEY_RIGHT) pacman.direction = 'R';
-
-        // Move PacMan
-        movePacMan();
-
-        // Render the screen
-        sf2d_start_frame(GFX_TOP, GFX_LEFT);
-        drawMaze();
-        sf2d_end_frame();
-
-        sf2d_swapbuffers();
-    }
-
-    // Clean up
-    sf2d_free_texture(pacmanTexture);
-    sf2d_free_texture(wallTexture);
-    sf2d_fini();
-    romfsExit();
-    gfxExit();
-
-    return 0;
+    return 0; 
 }
