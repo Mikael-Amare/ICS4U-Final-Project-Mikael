@@ -29,6 +29,7 @@ struct PacMan {
 char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1]; // Mutable maze
 PacMan pacman = {1, 16, 'R', 0};
 int timerDuration = 0; // Duration in seconds for timer
+bool gameRunning = false; // Flag to track whether the game is running
 
 void initializeGameMaze() {
     strcpy(gameMaze[0], "#################################################");
@@ -151,6 +152,16 @@ void chooseDifficulty() {
     }
 }
 
+void countdownTimer() {
+    while (timerDuration > 0) {
+        std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for 1 second
+        timerDuration--; // Decrease timer duration
+        displayTimer(); // Update the display with the new timer value
+    }
+    gameRunning = false; // Set the game to end once the timer is up
+    renderGameOver(); // Show game over message
+}
+
 int main() {
     gfxInitDefault();
 
@@ -168,9 +179,6 @@ int main() {
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
     initializeGameMaze(); // Initialize the maze before the game loop
 
-    bool gameRunning = false; // Flag to track whether the game is running
-    int moveCounter = 0; // Timer for movement delay
-
     while (aptMainLoop()) {
         hidScanInput();
         u32 kDown = hidKeysDown();
@@ -185,6 +193,10 @@ int main() {
             consoleClear(); // Clear bottom console
             consoleSelect(&bottomScreen);
             printf("Game started! Use arrows to move Pac-Man.\n");
+            
+            // Start the timer in a separate thread
+            std::thread timerThread(countdownTimer);
+            timerThread.detach(); // Detach the thread to run independently
         }
 
         // If the game is running, process game logic
@@ -196,22 +208,16 @@ int main() {
             if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
             // Increment the move counter
+            static int moveCounter = 0; // Static to maintain state across frames
             moveCounter++;
             if (moveCounter >= MOVE_DELAY) { // Only move Pac-Man every MOVE_DELAY frames
                 movePacMan(); // Move Pac-Man based on direction
                 moveCounter = 0; // Reset the move counter
             }
 
-            // Countdown timer
-            if (timerDuration > 0) {
-                timerDuration--;
-                std::this_thread::sleep_for(std::chrono::seconds(1)); // Delay for 1 second
-            }
-
             // Handle game over state
             if (timerDuration <= 0) {
                 gameRunning = false; // Pause the game
-                renderGameOver(); // Show game over message
             } else {
                 // Check if all dots are collected
                 if (allDotsCollected()) {
@@ -224,10 +230,10 @@ int main() {
                     // Switch to the top screen to draw the game
                     drawMaze(); // Draw the maze with Pac-Man
                 }
-
-                // Update the timer display
-                displayTimer(); // Show updated timer on the bottom screen
             }
+
+            // Update the timer display
+            displayTimer(); // Show updated timer on the bottom screen
         }
 
         // Restart game if A is pressed after game over
