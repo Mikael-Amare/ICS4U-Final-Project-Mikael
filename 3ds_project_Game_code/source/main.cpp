@@ -13,6 +13,9 @@
 
 #define PADDING_LEFT ((SCREEN_PIXEL_WIDTH - (SCREEN_WIDTH * CHARACTER_WIDTH)) / 2) 
 #define PADDING_TOP ((SCREEN_PIXEL_HEIGHT - (SCREEN_HEIGHT * CHARACTER_HEIGHT)) / 2)
+#define TARGET_FPS 30 // Set your target frames per second
+#define FRAME_DURATION (1000 / TARGET_FPS) // Calculate frame duration in milliseconds
+
 
 const int CHARACTER_WIDTH = 8;  
 const int CHARACTER_HEIGHT = 16;
