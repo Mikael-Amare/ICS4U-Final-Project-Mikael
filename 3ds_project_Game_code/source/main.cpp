@@ -59,20 +59,22 @@ void drawMaze() {
     // Clear the top screen
     consoleSelect(&topScreen);
     consoleClear();
-    
+
     // Print score and time on top screen
     printf("Score: %d\n", pacman.score);
     printf("Time: %d seconds\n", remainingTime); // Show remaining time
 
-    // Print the maze
+    // Print the maze one character at a time
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        printf("%s\n", gameMaze[y]); // Print each row of the maze
-    }
-
-    // Draw Pac-Man on the maze
-    // This prevents the character from being drawn outside of the maze bounds
-    if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
-        printf("\x1b[%d;%dHP", pacman.y + 1, pacman.x + 1); // Move cursor to Pac-Man's position
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            // Move the cursor to the correct position
+            printf("\x1b[%d;%dH", y + 3, x + 1); // Adjusting y + 3 to account for the score display
+            if (x == pacman.x && y == pacman.y) {
+                printf("P"); // Draw Pac-Man
+            } else {
+                printf("%c", gameMaze[y][x]); // Print maze character
+            }
+        }
     }
 
     gfxFlushBuffers(); 
