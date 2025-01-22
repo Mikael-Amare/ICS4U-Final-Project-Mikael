@@ -54,7 +54,7 @@ void initializeMaze() {
     
     pacman.score = 0; 
     pacman.x = 1; 
-    pacman.y = 16;
+    pacman.y = 17;
 }
 
 void drawMaze() {
