@@ -47,8 +47,8 @@ void initializeGameMaze() {
     strcpy(gameMaze[18], "#################################################");
     
     // Initialize Pac-Man's starting position, represented by 'P'
-    pacman.x = 10; // Adjust x position if needed
-    pacman.y = 1;  // Adjust y position if needed
+    pacman.x = 1; // Adjust x position if needed
+    pacman.y = 17;  // Adjust y position if needed
     pacman.score = 0; // Reset score
 }
 
