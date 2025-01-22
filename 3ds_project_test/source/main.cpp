@@ -17,6 +17,8 @@
 const int CHARACTER_WIDTH = 8;  
 const int CHARACTER_HEIGHT = 16;
 
+class Game;
+
 class PacMan {
 public:
     int x, y;
@@ -25,33 +27,10 @@ public:
 
     PacMan() : x(1), y(16), direction('R'), score(0) {}
 
-    void move() {
-        int newX = x;
-        int newY = y;
-
-        switch (direction) {
-            case 'U': newY--; break;
-            case 'D': newY++; break;
-            case 'L': newX--; break;
-            case 'R': newX++; break;
-        }
-
-        // Check for valid move
-        if (isValidMove(newX, newY)) {
-            x = newX;
-            y = newY;
-
-            if (gameMaze[newY][newX] == '.') { 
-                gameMaze[newY][newX] = ' '; 
-                score += 10; 
-            }
-        }
-    }
+    void move(Game& game);  // Pass game reference to allow access to gameMaze
 
 private:
-    bool isValidMove(int newX, int newY) {
-        return (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && gameMaze[newY][newX] != '#');
-    }
+    bool isValidMove(int newX, int newY, Game& game);
 };
 
 class Game {
@@ -83,6 +62,8 @@ public:
         }
         gfxExit(); 
     }
+
+    friend class PacMan;  // Allow PacMan access to private members
 
 private:
     char gameMaze[SCREEN_HEIGHT][SCREEN_WIDTH + 1];
@@ -127,6 +108,7 @@ private:
             printf("%s\n", gameMaze[y]);
         }
 
+        // Draw Pac-Man at the current position
         if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
             printf("\x1b[%d;%dHP", pacman.y + 2, pacman.x + 1);
         }
@@ -145,7 +127,7 @@ private:
 
             moveCounter++;
             if (moveCounter >= MOVE_DELAY) {
-                pacman.move(); 
+                pacman.move(*this); // Pass the current game instance
                 moveCounter = 0;
             }
 
@@ -183,18 +165,34 @@ private:
             gspWaitForVBlank();
         }
     }
-
-    bool allDotsCollected() {
-        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-            for (int x = 0; x < SCREEN_WIDTH; ++x) {
-                if (gameMaze[y][x] == '.') {
-                    return false; 
-                }
-            }
-        }
-        return true; 
-    }
 };
+
+void PacMan::move(Game& game) {
+    int newX = x;
+    int newY = y;
+
+    switch (direction) {
+        case 'U': newY--; break;
+        case 'D': newY++; break;
+        case 'L': newX--; break;
+        case 'R': newX++; break;
+    }
+
+    // Check for valid move
+    if (isValidMove(newX, newY, game)) {
+        x = newX;
+        y = newY;
+
+        if (game.gameMaze[newY][newX] == '.') { 
+            game.gameMaze[newY][newX] = ' '; 
+            score += 10; 
+        }
+    }
+}
+
+bool PacMan::isValidMove(int newX, int newY, Game& game) {
+    return (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && game.gameMaze[newY][newX] != '#');
+}
 
 int main() {
     gfxInitDefault();
