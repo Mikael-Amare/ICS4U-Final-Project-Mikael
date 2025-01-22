@@ -172,23 +172,28 @@ int main() {
     while (true) {
         auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
 
-        if (gameRunning) {
-            hidScanInput();
-            u32 kDown = hidKeysDown();
+        // Scan input and get the key states
+        hidScanInput();
+        u32 kDown = hidKeysDown(); // Now `kDown` is declared in the right scope
 
+        if (gameRunning) {
             if (remainingTime > 0) {
                 // Check for directional inputs
                 if (kDown & KEY_UP) {
                     pacman.direction = 'U';
+                    printf("Direction set to UP\n"); // Debug line
                 }
                 if (kDown & KEY_DOWN) {
                     pacman.direction = 'D';
+                    printf("Direction set to DOWN\n"); // Debug line
                 }
                 if (kDown & KEY_LEFT) {
                     pacman.direction = 'L';
+                    printf("Direction set to LEFT\n"); // Debug line
                 }
                 if (kDown & KEY_RIGHT) {
                     pacman.direction = 'R';
+                    printf("Direction set to RIGHT\n"); // Debug line
                 }
 
                 moveCounter++;
