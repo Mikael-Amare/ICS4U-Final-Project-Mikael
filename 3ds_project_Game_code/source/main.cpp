@@ -162,8 +162,8 @@ int main() {
     printf("Press A to start the game.\n");
     printf("Press START to exit.\n");
 
-    gfxSetDoubleBuffering(GFX_BOTTOM, false);
     gfxSetDoubleBuffering(GFX_TOP, true); // Enable double buffering on top screen
+    gfxSetDoubleBuffering(GFX_BOTTOM, true); // Enable double buffering on bottom screen
     initializeMaze(); // Initialize the maze with the layout
 
     bool gameRunning = false; 
@@ -171,29 +171,23 @@ int main() {
     
     while (true) {
         auto startTime = std::chrono::high_resolution_clock::now(); // Start time for frame
-
-        // Scan input and get the key states
         hidScanInput();
-        u32 kDown = hidKeysDown(); // Now `kDown` is declared in the right scope
+        u32 kDown = hidKeysDown(); // Capture key states
 
         if (gameRunning) {
             if (remainingTime > 0) {
                 // Check for directional inputs
                 if (kDown & KEY_UP) {
                     pacman.direction = 'U';
-                    printf("Direction set to UP\n"); // Debug line
                 }
                 if (kDown & KEY_DOWN) {
                     pacman.direction = 'D';
-                    printf("Direction set to DOWN\n"); // Debug line
                 }
                 if (kDown & KEY_LEFT) {
                     pacman.direction = 'L';
-                    printf("Direction set to LEFT\n"); // Debug line
                 }
                 if (kDown & KEY_RIGHT) {
                     pacman.direction = 'R';
-                    printf("Direction set to RIGHT\n"); // Debug line
                 }
 
                 moveCounter++;
@@ -207,7 +201,6 @@ int main() {
                 frameCount++;
                 if (frameCount >= 60) { // Every 60 frames
                     remainingTime--;
-                    printf("Remaining Time: %d\n", remainingTime); // Debug line
                     frameCount = 0; 
                 }
 
@@ -266,7 +259,7 @@ int main() {
         // Calculate how long to wait to maintain the target FPS
         auto endTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float, std::milli> frameTime = endTime - startTime;
-        int waitTime = FRAME_DURATION - static_cast<int>(frameTime.count());
+        int waitTime = 1000 / 30 - static_cast<int>(frameTime.count()); // Wait time for 30 FPS
         if (waitTime > 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(waitTime)); // Sleep to limit FPS
         }
