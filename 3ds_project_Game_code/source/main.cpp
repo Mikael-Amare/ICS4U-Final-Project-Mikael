@@ -52,8 +52,12 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
         // Ensure maze[counter] is appropriately null-terminated after the copy.
-        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
+        if (strlen(maze[counter]) > SCREEN_WIDTH) {
+            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
+        } else {
+            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
+        }
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -77,6 +81,7 @@ void drawMaze() {
         printf("\n"); // New line after each row
     }
 
+    // Make sure to flush and swap buffers
     gfxFlushBuffers(); 
     gfxSwapBuffers(); 
     gspWaitForVBlank(); 
