@@ -52,12 +52,8 @@ PrintConsole topScreen, bottomScreen; // Declare consoles globally
 void initializeGameMaze() {
     for (int counter = 0; counter < SCREEN_HEIGHT; counter++) {
         // Ensure maze[counter] is appropriately null-terminated after the copy.
-        if (strlen(maze[counter]) > SCREEN_WIDTH) {
-            strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
-            gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
-        } else {
-            strcpy(gameMaze[counter], maze[counter]); // Use strcpy if it's safe
-        }
+        strncpy(gameMaze[counter], maze[counter], SCREEN_WIDTH);
+        gameMaze[counter][SCREEN_WIDTH] = '\0'; // Null terminate the string
     }
     pacman.score = 0; // Reset score
     pacman.x = 1; // Reset Pac-Man's initial position
@@ -81,7 +77,6 @@ void drawMaze() {
         printf("\n"); // New line after each row
     }
 
-    // Make sure to flush and swap buffers
     gfxFlushBuffers(); 
     gfxSwapBuffers(); 
     gspWaitForVBlank(); 
@@ -191,13 +186,14 @@ int main() {
                     if (pauseInput & KEY_START) {
                         gameRunning = false; // Quit the game
                         break;
-                        }
+                    }
 
                     // Clear pause menu artifacts when exiting
                     if (pauseInput & KEY_A) {
                         consoleClear();
                         inPauseMenu = false; // Resume the game
-                        }
+                        drawMaze(); // Redraw maze upon resuming
+                    }
 
                     gfxFlushBuffers(); // Update screen
                     gfxSwapBuffers(); // Swap buffers
@@ -215,10 +211,6 @@ int main() {
             } else {
                 // Switch to the top screen to draw the game
                 drawMaze(); // Draw the maze with Pac-Man
-
-                gfxFlushBuffers(); // Flush the graphics buffers
-                gfxSwapBuffers(); // Swap the buffers to display
-                gspWaitForVBlank(); // Wait for the vertical blank to prevent tearing
             }
         }
     }
