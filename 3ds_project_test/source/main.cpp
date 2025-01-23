@@ -72,7 +72,7 @@ void run() {
         }
     }
     gfxExit();
-
+}
     // Allow PacMan class access to private members of Game
     friend class PacMan;  
 
@@ -232,13 +232,9 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
     return (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && game.gameMaze[newY][newX] != '#');
 }
 
-// Main function where the program starts
 int main() {
     gfxInitDefault(); // Initialize graphics
-
     Game pacmanGame; // Create an instance of the Game
-
     pacmanGame.run(); // Start the game loop
-
     return 0; 
 }
