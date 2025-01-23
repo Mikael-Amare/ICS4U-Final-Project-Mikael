@@ -28,6 +28,8 @@ private:
 class Game {
 public:
     Game() : remainingTime(0), moveCounter(0), gameRunning(false) {
+        consoleInit(&topConsole, GFX_TOP, NULL); // Initialize console for the top screen
+        consoleInit(&bottomConsole, GFX_BOTTOM, NULL); // Initialize console for the bottom screen
         initializeMaze();
     }
 
@@ -195,10 +197,9 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
 
 int main() {
     gfxInitDefault();
-    consoleInit(&topConsole, GFX_TOP, NULL); // Initialize console on the top screen
-    consoleInit(&bottomConsole, GFX_BOTTOM, NULL); // Initialize console on the bottom screen
 
-    Game pacmanGame;
+    Game pacmanGame;  // This will initialize everything including consoles
+
     pacmanGame.run();
 
     return 0; 
