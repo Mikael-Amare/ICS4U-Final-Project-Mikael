@@ -42,7 +42,7 @@ public:
                 chooseDifficulty();
                 gameRunning = true;
                 consoleClear(); 
-                consoleSelect(&bottomScreen);
+                consoleSelect(GFX_BOTTOM); // Use bottom screen for game start message
                 printf("Game started! Use arrows to move Pac-Man.\n");
             }
 
@@ -63,10 +63,6 @@ private:
     int remainingTime;
     int moveCounter;
     bool gameRunning;
-
-    // Declare consoles as members of the Game class
-    ConsoleTop topScreen;
-    ConsoleBottom bottomScreen;
 
     void initializeMaze() {
         strcpy(gameMaze[0], "#################################################");
@@ -95,7 +91,7 @@ private:
     }
 
     void drawMaze() {
-        consoleSelect(&topScreen);
+        consoleSelect(GFX_TOP);
         consoleClear();
         printf("Score: %d\n", pacman.score);
         printf("Time: %d seconds\n", remainingTime); 
@@ -137,7 +133,7 @@ private:
     }
 
     void chooseDifficulty() {
-        consoleSelect(&bottomScreen);
+        consoleSelect(GFX_BOTTOM);
         printf("Choose Difficulty:\n");
         printf("A Easy (4 min)\n");
         printf("B Medium (2.5 min)\n");
