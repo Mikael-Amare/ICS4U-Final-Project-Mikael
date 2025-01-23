@@ -107,27 +107,32 @@ private:
         pacman.y = 16; // Reset Pac-Man's starting y position
     }
 
-    // Function to draw the maze and Pac-Man on the console
-    void drawMaze() {
-        consoleSelect(&topConsole); // Switch to top screen console
-        consoleClear(); // Clear previous output
-        printf("Score: %d\n", pacman.score); // Display current score
-        printf("Time: %d seconds\n", remainingTime); // Display remaining time 
+void drawMaze() {
+    consoleSelect(&topConsole); // Switch to top screen console
+    consoleClear(); // Clear previous output
+    printf("Score: %d\n", pacman.score); // Display current score
+    printf("Time: %d seconds\n", remainingTime); // Display remaining time 
 
-        // Display the maze layout
-        for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-            printf("%s\n", gameMaze[y]);
-        }
-
-        // Draw Pac-Man at the current position
-        if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
-            printf("\x1b[%d;%dHP", pacman.y + 2, pacman.x + 1); // Move cursor to Pac-Man's position
-        }
-
-        gfxFlushBuffers(); // Flush graphics buffers to display
-        gfxSwapBuffers(); // Swap buffers for double buffering
-        gspWaitForVBlank(); // Wait for vertical blank to prevent tearing
+    // Display the maze layout
+    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        printf("%s\n", gameMaze[y]);
     }
+
+    // Draw Pac-Man at the current position
+    if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
+        // Place Pac-Man in the maze as 'P'
+        gameMaze[pacman.y][pacman.x] = 'P'; // Update maze array to reflect Pac-Man's position
+    }
+
+    // Print the maze again, but now it includes Pac-Man
+    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+        printf("%s\n", gameMaze[y]);
+    }
+
+    gfxFlushBuffers(); // Flush graphics buffers to display
+    gfxSwapBuffers(); // Swap buffers for double buffering
+    gspWaitForVBlank(); // Wait for vertical blank to prevent tearing
+}
 
     // Function to handle user input for Pac-Man's movement
     void handleInput(u32 kDown) {
