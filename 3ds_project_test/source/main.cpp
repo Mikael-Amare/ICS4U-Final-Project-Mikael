@@ -52,23 +52,14 @@ public:
 
             if (gameRunning) {
                 auto currentTime = std::chrono::steady_clock::now();
-                // Update remaining time based on elapsed time
-                auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count();
-                if (elapsedTime > 0 && remainingTime > 0) {
-                    remainingTime--; // Decrease remaining time every second
-                    startTime = currentTime; // Reset start time
-                }
-
-                handleInput(kDown);
-                updateGame(); 
-
-                std::chrono::duration<double, std::milli> elapsedFrame = currentTime - lastFrameTime;
-                if (elapsedFrame.count() >= 16.67) { // Roughly 60 FPS
-                    drawMaze(); 
-                    lastFrameTime = currentTime; 
+                auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastFrameTime).count();
+    
+                if (elapsedSeconds > 0) { 
+                    if (remainingTime > 0) remainingTime--; 
+                        lastFrameTime = currentTime; // Reset frame time
+                    }
                 }
             }
-        }
         gfxExit();
     }
 
