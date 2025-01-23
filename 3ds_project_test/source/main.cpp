@@ -41,30 +41,37 @@ public:
         initializeMaze(); // Set up the maze layout
     }
 
-    // Main game loop
-    void run() {
-        while (aptMainLoop()) {
-            hidScanInput(); // Scan for user input
-            u32 kDown = hidKeysDown(); // Get the keys currently pressed
+// Main game loop
+void run() {
+    auto lastFrameTime = std::chrono::steady_clock::now(); // Record last frame time
+    while (aptMainLoop()) {
+        hidScanInput(); // Scan for user input
+        u32 kDown = hidKeysDown(); // Get the keys currently pressed
 
-            if (kDown & KEY_START) break; // Exit the game if START is pressed
+        if (kDown & KEY_START) break; // Exit the game if START is pressed
 
-            if (kDown & KEY_A && !gameRunning) {
-                chooseDifficulty(); // Set game difficulty
-                gameRunning = true; // Start the game
-                consoleClear(); // Clear the console
-                consoleSelect(&bottomConsole); // Switch to bottom screen
-                printf("Game started! Use arrows to move Pac-Man.\n"); // Display start message
-            }
+        if (kDown & KEY_A && !gameRunning) {
+            chooseDifficulty(); // Set game difficulty
+            gameRunning = true; // Start the game
+            consoleClear(); // Clear the console
+            consoleSelect(&bottomConsole); // Switch to bottom screen
+            printf("Game started! Use arrows to move Pac-Man.\n"); // Display start message
+        }
 
-            if (gameRunning) {
-                handleInput(kDown); // Handle user input
-                updateGame(); // Update game logic if necessary
+        if (gameRunning) {
+            handleInput(kDown); // Handle user input
+            updateGame(); // Update game logic if necessary
+
+            // Control the frame rate
+            auto currentTime = std::chrono::steady_clock::now();
+            std::chrono::duration<double, std::milli> elapsed = currentTime - lastFrameTime;
+            if (elapsed.count() >= 16.67) { // Roughly 60 FPS
                 drawMaze(); // Draw the maze and Pac-Man
+                lastFrameTime = currentTime; // Update last frame time
             }
         }
-        gfxExit(); // Exit graphics and clean up resources
     }
+    gfxExit();
 
     // Allow PacMan class access to private members of Game
     friend class PacMan;  
@@ -110,23 +117,21 @@ private:
 void drawMaze() {
     consoleSelect(&topConsole); // Switch to top screen console
     consoleClear(); // Clear previous output
+
+    // Draw the maze first
     printf("Score: %d\n", pacman.score); // Display current score
     printf("Time: %d seconds\n", remainingTime); // Display remaining time 
 
-    // Display the maze layout
+    // Display the maze layout including Pac-Man
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        printf("%s\n", gameMaze[y]);
-    }
-
-    // Draw Pac-Man at the current position
-    if (pacman.x >= 0 && pacman.x < SCREEN_WIDTH && pacman.y >= 0 && pacman.y < SCREEN_HEIGHT) {
-        // Place Pac-Man in the maze as 'P'
-        gameMaze[pacman.y][pacman.x] = 'P'; // Update maze array to reflect Pac-Man's position
-    }
-
-    // Print the maze again, but now it includes Pac-Man
-    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        printf("%s\n", gameMaze[y]);
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            if (y == pacman.y && x == pacman.x) {
+                printf("P"); // Draw Pac-Man
+            } else {
+                printf("%c", gameMaze[y][x]); // Draw maze character
+            }
+        }
+        printf("\n"); // New line after each row
     }
 
     gfxFlushBuffers(); // Flush graphics buffers to display
