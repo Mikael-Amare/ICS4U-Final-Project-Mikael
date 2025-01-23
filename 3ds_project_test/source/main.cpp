@@ -7,7 +7,7 @@
 // Define constants for screen dimensions and move delay
 #define SCREEN_WIDTH 50  
 #define SCREEN_HEIGHT 20 
-#define MOVE_DELAY 200 // Delay in milliseconds for movement (adjustable)
+#define MOVE_DELAY 20 // Delay in milliseconds for movement (adjustable)
 
 // Forward declaration
 class Game;
