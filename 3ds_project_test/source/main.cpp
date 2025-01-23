@@ -7,12 +7,7 @@
 
 #define SCREEN_WIDTH 50  
 #define SCREEN_HEIGHT 20 
-#define SCREEN_PIXEL_WIDTH 400 
-#define SCREEN_PIXEL_HEIGHT 240 
 #define MOVE_DELAY 5 
-
-#define CHARACTER_WIDTH 8  
-#define CHARACTER_HEIGHT 16
 
 class Game;
 
@@ -68,6 +63,10 @@ private:
     int remainingTime;
     int moveCounter;
     bool gameRunning;
+
+    // Declare consoles as members of the Game class
+    ConsoleTop topScreen;
+    ConsoleBottom bottomScreen;
 
     void initializeMaze() {
         strcpy(gameMaze[0], "#################################################");
@@ -197,8 +196,8 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
 
 int main() {
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL); // Use NULL for default console
-    consoleInit(GFX_BOTTOM, NULL); // Use NULL for default console
+    consoleInit(GFX_TOP, NULL); // Initialize console on the top screen
+    consoleInit(GFX_BOTTOM, NULL); // Initialize console on the bottom screen
 
     Game pacmanGame;
     pacmanGame.run();
