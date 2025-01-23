@@ -1,21 +1,42 @@
-<mxfile host="65bd71144e">
-    <diagram name="Page-1" id="RHxNDK3dNH6W43sUgH_4">
-        <mxGraphModel dx="934" dy="474" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+<mxfile>
+  <diagram name="Class Diagram">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="600" math="0" shadow="0">
       <root>
-        <mxCell id="0" parent="">
-          <mxCell id="1" parent="0"/>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- PacMan Class -->
+        <mxCell id="2" value="PacMan" style="swimlane" vertex="1" parent="1">
+          <mxGeometry x="200" y="150" width="160" height="140" as="geometry"/>
         </mxCell>
-        <mxCell id="2" value="Button" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="100" y="100" width="120" height="60" as="geometry"/>
+        <mxCell id="3" value="+ x: int\n+ y: int\n+ direction: char\n+ score: int" style="text" vertex="1" parent="2">
+          <mxGeometry x="0" y="40" width="160" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="3" value="Section" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="300" y="100" width="160" height="120" as="geometry"/>
+        <mxCell id="4" value="+ PacMan()\n+ move(Game): void" style="text" vertex="1" parent="2">
+          <mxGeometry x="0" y="100" width="160" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="4" value="Hover Effect" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#fbbc05;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="100" y="220" width="80" height="80" as="geometry"/>
+        <mxCell id="5" value="- isValidMove(newX: int, newY: int, game: Game): bool" style="text" vertex="1" parent="2">
+          <mxGeometry x="0" y="140" width="160" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="5" style="line;endArrow=blockThin;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="2" target="3"/>
-        <mxCell id="6" style="line;endArrow=blockThin;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="2" target="4"/>
+
+        <!-- Game Class -->
+        <mxCell id="6" value="Game" style="swimlane" vertex="1" parent="1">
+          <mxGeometry x="400" y="150" width="200" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" value="+ pacman: PacMan\n+ remainingTime: int\n+ gameRunning: bool\n+ gameMaze: char[][]" style="text" vertex="1" parent="6">
+          <mxGeometry x="0" y="40" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="8" value="+ Game()\n+ run(): void" style="text" vertex="1" parent="6">
+          <mxGeometry x="0" y="120" width="200" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="9" value="- initializeMaze(): void\n- drawMaze(): void\n- handleInput(kDown: u32): void\n- chooseDifficulty(): void" style="text" vertex="1" parent="6">
+          <mxGeometry x="0" y="160" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Relationship -->
+        <mxCell id="10" edge="1" source="2" target="6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
