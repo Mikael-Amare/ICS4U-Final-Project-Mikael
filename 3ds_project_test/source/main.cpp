@@ -32,6 +32,7 @@ public:
         consoleInit(GFX_TOP, &topConsole);  
         consoleInit(GFX_BOTTOM, &bottomConsole); 
         initializeMaze(); 
+        gfxInitDefault();
     }
 
     void run() {
@@ -72,6 +73,13 @@ public:
 
                 // Render the game at roughly 60 FPS
                 drawMaze();
+
+                // Check for game over condition
+                if (remainingTime <= 0) {
+                    consoleSelect(&topConsole);
+                    printf("\x1b[HGame Over! Your score: %d\n", pacman.score);
+                    gameRunning = false; // End the game
+                }
             }
         }
 
@@ -134,6 +142,7 @@ private:
         else if (kDown & KEY_DOWN) pacman.direction = 'D';
         else if (kDown & KEY_LEFT) pacman.direction = 'L';
         else if (kDown & KEY_RIGHT) pacman.direction = 'R';
+        else pacman.direction = ' '; // Reset direction if no key is pressed
     }
 
     void chooseDifficulty() {
@@ -172,7 +181,7 @@ void PacMan::move(Game& game) {
 
         if (game.gameMaze[y][x] == '.') {
             score += 10;
-            game.gameMaze[y][x] = ' ';
+            game.gameMaze[y][x] = ' '; // Consume dot
         }
     }
 }
@@ -182,7 +191,6 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
 }
 
 int main() {
-    gfxInitDefault();
     Game pacmanGame;
     pacmanGame.run();
     return 0;
