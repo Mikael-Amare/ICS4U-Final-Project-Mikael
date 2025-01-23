@@ -14,10 +14,6 @@
 #define CHARACTER_WIDTH 8  
 #define CHARACTER_HEIGHT 16
 
-// Declare screens globally
-ConsoleTop topScreen;
-ConsoleBottom bottomScreen;
-
 class Game;
 
 class PacMan {
@@ -169,7 +165,6 @@ private:
 
     void updateGame() {
         // Update game logic here if necessary
-        // For now, we can leave it empty
     }
 };
 
@@ -202,12 +197,8 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
 
 int main() {
     gfxInitDefault();
-    consoleInit(GFX_TOP, &topScreen);
-    consoleInit(GFX_BOTTOM, &bottomScreen);
-
-    // Enable double buffering for the bottom screen and top screen
-    gfxSetDoubleBuffering(GFX_BOTTOM, false);
-    gfxSetDoubleBuffering(GFX_TOP, true); 
+    consoleInit(GFX_TOP, NULL); // Use NULL for default console
+    consoleInit(GFX_BOTTOM, NULL); // Use NULL for default console
 
     Game pacmanGame;
     pacmanGame.run();
