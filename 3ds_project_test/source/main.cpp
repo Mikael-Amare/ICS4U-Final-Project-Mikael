@@ -1,14 +1,13 @@
 #include <3ds.h>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
 #include <chrono>
 #include <thread>
 
 // Define constants for screen dimensions and move delay
 #define SCREEN_WIDTH 50  
 #define SCREEN_HEIGHT 20 
-#define MOVE_DELAY 5 
+#define MOVE_DELAY 20 // Increased to slow down the movement
 
 class Game; // Forward declaration
 
@@ -116,7 +115,7 @@ private:
             for (int counter2 = 0; counter2 < SCREEN_WIDTH; counter2++) {
                 // Draw Pac-Man in the maze
                 if (counter2 == pacman.x && counter1 == pacman.y) {
-                    printf("C"); // Represent Pac-Man with 'C'
+                    printf("P"); // Represent Pac-Man with 'P'
                 } else {
                     printf("%c", gameMaze[counter1][counter2]); // Draw the maze
                 }
