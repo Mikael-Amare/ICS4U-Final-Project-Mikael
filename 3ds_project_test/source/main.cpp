@@ -18,7 +18,7 @@ public:
     char direction;      // Current movement direction ('U', 'D', 'L', 'R')
     int score;           // Current score of the player
 
-    PacMan() : x(1), y(16), direction('R'), score(0) {} // Starting at the bottom left corner
+    PacMan() : x(1), y(16), direction(' '), score(0) {} // Starting at the bottom left corner with no initial direction
 
     void move(Game& game);
 
@@ -81,7 +81,7 @@ private:
     int remainingTime; 
     int moveCounter; 
     bool gameRunning; 
-    std::chrono::steady_clock::time_point startTime; // Declare startTime here
+    std::chrono::steady_clock::time_point startTime; 
     PrintConsole topConsole; 
     PrintConsole bottomConsole; 
 
@@ -111,8 +111,17 @@ private:
     void drawMaze() {
         consoleSelect(&topConsole); 
         printf("\x1b[2J\x1b[H"); // Clear screen
+
         for (int counter1 = 0; counter1 < SCREEN_HEIGHT; counter1++) {
-            printf("%s\n", gameMaze[counter1]); // Print the maze
+            for (int counter2 = 0; counter2 < SCREEN_WIDTH; counter2++) {
+                // Draw Pac-Man in the maze
+                if (counter2 == pacman.x && counter1 == pacman.y) {
+                    printf("C"); // Represent Pac-Man with 'C'
+                } else {
+                    printf("%c", gameMaze[counter1][counter2]); // Draw the maze
+                }
+            }
+            printf("\n");
         }
         consoleSelect(&bottomConsole); 
         printf("Score: %d | Time Left: %d\n", pacman.score, remainingTime);
@@ -185,6 +194,7 @@ void PacMan::move(Game& game) {
 }
 
 bool PacMan::isValidMove(int newX, int newY, Game& game) {
+    // Validate that the new coordinates are within bounds and not hitting a wall
     return (newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && game.gameMaze[newY][newX] != '#');
 }
 
