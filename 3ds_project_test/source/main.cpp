@@ -209,6 +209,8 @@ void PacMan::move(Game& game) {
 
     // Check for valid move
     if (isValidMove(newX, newY, game)) {
+        // Clear the old position in the maze
+        game.gameMaze[y][x] = ' '; // Set old position to empty space
         x = newX; // Update x position
         y = newY; // Update y position
 
