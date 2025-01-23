@@ -42,7 +42,7 @@ public:
                 chooseDifficulty();
                 gameRunning = true;
                 consoleClear(); 
-                consoleSelect(GFX_BOTTOM); // Use bottom screen for game start message
+                consoleSelect(&bottomConsole); // Use bottom screen for game start message
                 printf("Game started! Use arrows to move Pac-Man.\n");
             }
 
@@ -63,6 +63,9 @@ private:
     int remainingTime;
     int moveCounter;
     bool gameRunning;
+
+    PrintConsole topConsole;    // Console for top screen
+    PrintConsole bottomConsole; // Console for bottom screen
 
     void initializeMaze() {
         strcpy(gameMaze[0], "#################################################");
@@ -91,7 +94,7 @@ private:
     }
 
     void drawMaze() {
-        consoleSelect(GFX_TOP);
+        consoleSelect(&topConsole);
         consoleClear();
         printf("Score: %d\n", pacman.score);
         printf("Time: %d seconds\n", remainingTime); 
@@ -133,7 +136,7 @@ private:
     }
 
     void chooseDifficulty() {
-        consoleSelect(GFX_BOTTOM);
+        consoleSelect(&bottomConsole);
         printf("Choose Difficulty:\n");
         printf("A Easy (4 min)\n");
         printf("B Medium (2.5 min)\n");
@@ -192,8 +195,8 @@ bool PacMan::isValidMove(int newX, int newY, Game& game) {
 
 int main() {
     gfxInitDefault();
-    consoleInit(GFX_TOP, NULL); // Initialize console on the top screen
-    consoleInit(GFX_BOTTOM, NULL); // Initialize console on the bottom screen
+    consoleInit(&topConsole, GFX_TOP, NULL); // Initialize console on the top screen
+    consoleInit(&bottomConsole, GFX_BOTTOM, NULL); // Initialize console on the bottom screen
 
     Game pacmanGame;
     pacmanGame.run();
