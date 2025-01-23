@@ -139,31 +139,32 @@ void drawMaze() {
     gspWaitForVBlank(); // Wait for vertical blank to prevent tearing
 }
 
-    // Function to handle user input for Pac-Man's movement
-    void handleInput(u32 kDown) {
-        if (remainingTime > 0) {
-            // Update Pac-Man's direction based on key presses
-            if (kDown & KEY_UP) pacman.direction = 'U';
-            if (kDown & KEY_DOWN) pacman.direction = 'D';
-            if (kDown & KEY_LEFT) pacman.direction = 'L';
-            if (kDown & KEY_RIGHT) pacman.direction = 'R';
+// Function to handle user input for Pac-Man's movement
+void handleInput(u32 kDown) {
+    if (remainingTime > 0) {
+        // Update Pac-Man's direction based on key presses
+        if (kDown & KEY_UP) pacman.direction = 'U';
+        else if (kDown & KEY_DOWN) pacman.direction = 'D';
+        else if (kDown & KEY_LEFT) pacman.direction = 'L';
+        else if (kDown & KEY_RIGHT) pacman.direction = 'R';
 
-            moveCounter++; // Increment move counter
-            // Move Pac-Man if the delay has been reached
-            if (moveCounter >= MOVE_DELAY) {
-                pacman.move(*this); // Pass the current game instance to Pac-Man's move function
-                moveCounter = 0; // Reset move counter
-            }
+        moveCounter++; // Increment move counter
 
-            // Manage countdown for remaining time
-            static int frameCount = 0; // Frame counter for time update
-            frameCount++;
-            if (frameCount >= 60) { // Decrease time every 60 frames
-                remainingTime--;
-                frameCount = 0; 
-            }
+        // Move Pac-Man if the delay has been reached
+        if (moveCounter >= MOVE_DELAY) {
+            pacman.move(*this); // Pass the current game instance to Pac-Man's move function
+            moveCounter = 0; // Reset move counter
+        }
+
+        // Manage countdown for remaining time
+        static int frameCount = 0; // Frame counter for time update
+        frameCount++;
+        if (frameCount >= 60) { // Decrease time every 60 frames
+            remainingTime--;
+            frameCount = 0; 
         }
     }
+}
 
     // Function to prompt the player to choose a difficulty level
     void chooseDifficulty() {
