@@ -59,17 +59,25 @@ void run() {
         }
 
         if (gameRunning) {
-            handleInput(kDown); // Handle user input
-            updateGame(); // Update game logic if necessary
+    auto currentTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count();
 
-            // Control the frame rate
-            auto currentTime = std::chrono::steady_clock::now();
-            std::chrono::duration<double, std::milli> elapsed = currentTime - lastFrameTime;
-            if (elapsed.count() >= 16.67) { // Roughly 60 FPS
-                drawMaze(); // Draw the maze and Pac-Man
-                lastFrameTime = currentTime; // Update last frame time
+        // Update remainingTime based on elapsedTime
+            if (elapsedTime >= 1 && remainingTime > 0) {
+                remainingTime--; // Decrease remaining time every second
+                startTime = currentTime; // Reset start time
             }
-        }
+
+    handleInput(kDown); // Handle user input
+    updateGame(); // Update game logic if necessary
+
+    // Control the frame rate
+    std::chrono::duration<double, std::milli> elapsedFrame = currentTime - lastFrameTime;
+    if (elapsedFrame.count() >= 16.67) { // Roughly 60 FPS
+        drawMaze(); // Draw the maze and Pac-Man
+        lastFrameTime = currentTime; // Update last frame time
+    }
+}
     }
     gfxExit();
 }
