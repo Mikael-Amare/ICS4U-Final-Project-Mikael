@@ -7,9 +7,9 @@
 // Define constants for screen dimensions and move delay
 #define SCREEN_WIDTH 50  
 #define SCREEN_HEIGHT 20 
-#define MOVE_DELAY 30 // Delay in milliseconds for movement (adjustable)
+#define MOVE_DELAY 100 // Delay in milliseconds for movement (adjustable)
 
-// Forward declaration
+// Forward declaration of Game class
 class Game;
 
 class PacMan {
@@ -29,6 +29,7 @@ private:
 class Game {
 public:
     Game() : remainingTime(0), gameRunning(false) {
+        // Initialize consoles for displaying game information
         consoleInit(GFX_TOP, &topConsole);  
         consoleInit(GFX_BOTTOM, &bottomConsole); 
         initializeMaze(); 
@@ -43,8 +44,10 @@ public:
             hidScanInput();
             u32 kDown = hidKeysDown();
 
+            // Exit the game on start button press
             if (kDown & KEY_START) break;
 
+            // Start a new game on 'A' press
             if (kDown & KEY_A && !gameRunning) {
                 chooseDifficulty();
                 gameRunning = true;
@@ -71,7 +74,7 @@ public:
                     lastMoveTime = currentTime;
                 }
 
-                // Render the game at roughly 60 FPS
+                // Render the game
                 drawMaze();
 
                 // Check for game over condition
@@ -96,6 +99,7 @@ private:
     PrintConsole topConsole;
     PrintConsole bottomConsole;
 
+    // Initialize the game maze
     void initializeMaze() {
         strcpy(gameMaze[0], "#################################################");
         strcpy(gameMaze[1], "# ............................................. #");
@@ -118,6 +122,7 @@ private:
         strcpy(gameMaze[18], "#################################################");
     }
 
+    // Render the maze and game state
     void drawMaze() {
         consoleSelect(&topConsole);
         printf("\x1b[H"); // Move cursor to the top-left
@@ -125,18 +130,20 @@ private:
         for (int y = 0; y < SCREEN_HEIGHT; y++) {
             for (int x = 0; x < SCREEN_WIDTH; x++) {
                 if (x == pacman.x && y == pacman.y) {
-                    printf("P");
+                    printf("P"); // Draw Pac-Man
                 } else {
-                    printf("%c", gameMaze[y][x]);
+                    printf("%c", gameMaze[y][x]); // Draw maze walls or dots
                 }
             }
             printf("\n");
         }
 
+        // Display the score and remaining time
         consoleSelect(&bottomConsole);
         printf("Score: %d | Time Left: %d\n", pacman.score, remainingTime);
     }
 
+    // Handle user inputs for movement
     void handleInput(u32 kDown) {
         if (kDown & KEY_UP) pacman.direction = 'U';
         else if (kDown & KEY_DOWN) pacman.direction = 'D';
@@ -145,6 +152,7 @@ private:
         else pacman.direction = ' '; // Reset direction if no key is pressed
     }
 
+    // Choose the game difficulty
     void chooseDifficulty() {
         consoleSelect(&bottomConsole);
         printf("Select Difficulty: A - Easy (4 mins), B - Medium (2.5 mins), X - Hard (2 mins)\n");
@@ -167,18 +175,22 @@ private:
     }
 };
 
+// Movement logic for Pac-Man
 void PacMan::move(Game& game) {
     int newX = x, newY = y;
 
+    // Determine the new position based on direction
     if (direction == 'U') newY--;
     else if (direction == 'D') newY++;
     else if (direction == 'L') newX--;
     else if (direction == 'R') newX++;
 
+    // If the move is valid, update position
     if (isValidMove(newX, newY, game)) {
         x = newX;
         y = newY;
 
+        // Consume dots and increase score
         if (game.gameMaze[y][x] == '.') {
             score += 10;
             game.gameMaze[y][x] = ' '; // Consume dot
@@ -186,10 +198,12 @@ void PacMan::move(Game& game) {
     }
 }
 
+// Validate the new move position
 bool PacMan::isValidMove(int newX, int newY, Game& game) {
     return newX >= 0 && newX < SCREEN_WIDTH && newY >= 0 && newY < SCREEN_HEIGHT && game.gameMaze[newY][newX] != '#';
 }
 
+// Main entry point
 int main() {
     Game pacmanGame;
     pacmanGame.run();
