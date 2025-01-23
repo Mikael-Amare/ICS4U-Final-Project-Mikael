@@ -1,42 +1,21 @@
-<mxfile host="app.diagrams.net">
-  <diagram name="Page-1" id="RHxNDK3dNH6W43sUgH_4">
-    <mxGraphModel dx="986" dy="621" grid="1" gridSize="10" gutter="20" FOLDING="true" connect="true" arrows="1" shadow="0">
+<mxfile host="65bd71144e">
+    <diagram name="Page-1" id="RHxNDK3dNH6W43sUgH_4">
+        <mxGraphModel dx="934" dy="474" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="2" value="PMan" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="220" y="160" width="120" height="60" as="geometry" />
+        <mxCell id="0" parent="">
+          <mxCell id="1" parent="0"/>
         </mxCell>
-        <mxCell id="3" value="x : int" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="50" width="120" height="30" as="geometry" />
+        <mxCell id="2" value="Button" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="120" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="4" value="y : int" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="80" width="120" height="30" as="geometry" />
+        <mxCell id="3" value="Section" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="160" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="5" value="direction : char" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="110" width="120" height="30" as="geometry" />
+        <mxCell id="4" value="Hover Effect" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#fbbc05;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="220" width="80" height="80" as="geometry"/>
         </mxCell>
-        <mxCell id="6" value="score : int" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="140" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="7" value="initializeGameMaze()" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="170" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="8" value="drawMaze()" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="200" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="9" value="renderPauseMenu()" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="230" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="10" value="movePacMan()" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="260" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="11" value="allDotsCollected() : bool" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="290" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="12" value="main()" style="text;html=1;strokeColor=none;fillColor=none;" vertex="1" parent="2">
-          <mxGeometry x="0" y="320" width="120" height="30" as="geometry" />
-        </mxCell>
+        <mxCell id="5" style="line;endArrow=blockThin;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="2" target="3"/>
+        <mxCell id="6" style="line;endArrow=blockThin;strokeColor=#333333;strokeWidth=2;" edge="1" parent="1" source="2" target="4"/>
       </root>
     </mxGraphModel>
   </diagram>
