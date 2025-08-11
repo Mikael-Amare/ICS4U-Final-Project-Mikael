@@ -30,10 +30,10 @@ class Game {
 public:
     Game() : remainingTime(0), gameRunning(false) {
         // Initialize consoles for displaying game information
+        gfxInitDefault();
         consoleInit(GFX_TOP, &topConsole);  
         consoleInit(GFX_BOTTOM, &bottomConsole); 
         initializeMaze(); 
-        gfxInitDefault();
     }
 
     void run() {
